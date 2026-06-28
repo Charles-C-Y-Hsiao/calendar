@@ -11,7 +11,11 @@ let ws = null;
 let editingItemId = null;
 let editingEvergreenId = null;
 let draggingItemId = null;
+let draggingEvergreenId = null;
+let todoPointerDrag = null;
+let evergreenPointerDrag = null;
 let isEditMode = false;
+let isEvergreenEditMode = false;
 
 const els = {
   weekLink: document.getElementById('weekLink'),
@@ -26,6 +30,7 @@ const els = {
   form: document.getElementById('todoForm'),
   evergreenForm: document.getElementById('evergreenForm'),
   evergreenAdd: document.getElementById('evergreenAdd'),
+  evergreenEditModeToggle: document.getElementById('evergreenEditModeToggle'),
   evergreenQuickInput: document.getElementById('evergreenQuickInput'),
   evergreenList: document.getElementById('evergreenList'),
   evergreenEmpty: document.getElementById('evergreenEmpty'),
@@ -111,6 +116,9 @@ function bindEvents() {
     await saveCurrentDay();
   });
   els.evergreenForm.addEventListener('submit', addEvergreenFromForm);
+  els.evergreenEditModeToggle.addEventListener('click', () => {
+    setEvergreenEditMode(!isEvergreenEditMode);
+  });
   els.evergreenClose.addEventListener('click', closeEvergreenEditor);
   els.evergreenCancel.addEventListener('click', closeEvergreenEditor);
   els.evergreenSave.addEventListener('click', saveEvergreenEditor);
@@ -198,6 +206,9 @@ function renderEvergreen() {
     const status = normalizeEvergreenStatus(item.status, item.completed);
     return `
       <li class="evergreen-item ${done ? 'is-done' : ''} ${status === 'archived' ? 'is-archived' : ''}" data-id="${escapeHtml(item.id)}">
+        <button class="evergreen-drag row-action" type="button" title="Move">
+          <i class="fa-solid fa-grip-vertical"></i>
+        </button>
         <input class="evergreen-check" type="checkbox" title="Done" ${done ? 'checked' : ''}>
         <span class="evergreen-main">
           <span class="evergreen-title">${escapeHtml(item.text || '')}</span>
@@ -226,6 +237,7 @@ function renderEvergreen() {
   els.evergreenList.querySelectorAll('.evergreen-item').forEach(row => {
     const id = row.dataset.id;
     row.querySelector('.evergreen-check').addEventListener('change', async event => {
+      if (!isEvergreenEditMode) return;
       const item = evergreenItems.find(entry => entry.id === id);
       if (!item) return;
       item.completed = event.target.checked;
@@ -234,17 +246,141 @@ function renderEvergreen() {
       await saveEvergreen();
     });
     row.querySelector('.evergreen-schedule').addEventListener('click', async () => {
+      if (!isEvergreenEditMode) return;
       await scheduleEvergreenToday(id);
     });
-    row.querySelector('.evergreen-edit').addEventListener('click', () => openEvergreenEditor(id));
+    row.querySelector('.evergreen-edit').addEventListener('click', () => {
+      if (!isEvergreenEditMode) return;
+      openEvergreenEditor(id);
+    });
     row.querySelector('.evergreen-delete').addEventListener('click', async () => {
+      if (!isEvergreenEditMode) return;
       const item = evergreenItems.find(entry => entry.id === id);
       if (!item) return;
       item.status = 'archived';
       renderEvergreen();
       await saveEvergreen();
     });
+    const dragBtn = row.querySelector('.evergreen-drag');
+    dragBtn.addEventListener('pointerdown', event => {
+      event.stopPropagation();
+      if (isEvergreenEditMode) return;
+      beginEvergreenPointerDrag(event, id, row);
+    });
+    dragBtn.addEventListener('click', event => event.stopPropagation());
+    row.addEventListener('dragstart', event => {
+      if (isEvergreenEditMode) {
+        event.preventDefault();
+        return;
+      }
+      draggingEvergreenId = id;
+      row.classList.add('is-dragging');
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', id);
+    });
+    row.addEventListener('dragend', () => {
+      row.draggable = false;
+      row.classList.remove('is-dragging');
+      draggingEvergreenId = null;
+      els.evergreenList.querySelectorAll('.evergreen-item.is-drop-target').forEach(item => item.classList.remove('is-drop-target'));
+    });
+    row.addEventListener('dragover', event => {
+      if (!isEvergreenEditMode) return;
+      if (!draggingEvergreenId || draggingEvergreenId === id) return;
+      event.preventDefault();
+      row.classList.add('is-drop-target');
+    });
+    row.addEventListener('dragleave', () => row.classList.remove('is-drop-target'));
+    row.addEventListener('drop', async event => {
+      event.preventDefault();
+      row.classList.remove('is-drop-target');
+      const sourceId = event.dataTransfer.getData('text/plain') || draggingEvergreenId;
+      if (!sourceId || sourceId === id) return;
+      const rect = row.getBoundingClientRect();
+      const placement = event.clientY > rect.top + rect.height / 2 ? 'after' : 'before';
+      reorderEvergreen(sourceId, id, placement);
+      normalizeEvergreenOrder();
+      renderEvergreen();
+      await saveEvergreen();
+    });
   });
+}
+
+function beginEvergreenPointerDrag(event, id, row) {
+  if (event.button !== 0) return;
+  event.preventDefault();
+  const state = {
+    id,
+    row,
+    pointerId: event.pointerId,
+    startX: event.clientX,
+    startY: event.clientY,
+    moved: false,
+    targetRow: null,
+    placement: 'before',
+  };
+  evergreenPointerDrag = state;
+
+  const clearTarget = () => {
+    els.evergreenList.querySelectorAll('.evergreen-item.is-drop-target').forEach(item => item.classList.remove('is-drop-target'));
+  };
+
+  const updateTarget = pointerEvent => {
+    clearTarget();
+    const target = document.elementFromPoint(pointerEvent.clientX, pointerEvent.clientY)?.closest('.evergreen-item');
+    if (!target || !els.evergreenList.contains(target) || target.dataset.id === id) {
+      state.targetRow = null;
+      return;
+    }
+    const rect = target.getBoundingClientRect();
+    state.targetRow = target;
+    state.placement = pointerEvent.clientY > rect.top + rect.height / 2 ? 'after' : 'before';
+    target.classList.add('is-drop-target');
+  };
+
+  const cleanup = () => {
+    window.removeEventListener('pointermove', onMove);
+    window.removeEventListener('pointerup', onUp);
+    window.removeEventListener('pointercancel', onCancel);
+    clearTarget();
+    row.classList.remove('is-dragging');
+    evergreenPointerDrag = null;
+  };
+
+  const onMove = pointerEvent => {
+    if (pointerEvent.pointerId !== state.pointerId) return;
+    const dx = Math.abs(pointerEvent.clientX - state.startX);
+    const dy = Math.abs(pointerEvent.clientY - state.startY);
+    if (dx > 4 || dy > 4) {
+      state.moved = true;
+      row.classList.add('is-dragging');
+    }
+    if (state.moved) {
+      pointerEvent.preventDefault();
+      updateTarget(pointerEvent);
+    }
+  };
+
+  const onUp = async pointerEvent => {
+    if (pointerEvent.pointerId !== state.pointerId) return;
+    const targetId = state.targetRow?.dataset.id;
+    const placement = state.placement;
+    cleanup();
+    if (!state.moved || !targetId || targetId === id) return;
+    reorderEvergreen(id, targetId, placement);
+    normalizeEvergreenOrder();
+    renderEvergreen();
+    await saveEvergreen();
+  };
+
+  const onCancel = pointerEvent => {
+    if (pointerEvent.pointerId !== state.pointerId) return;
+    cleanup();
+  };
+
+  window.addEventListener('pointermove', onMove);
+  window.addEventListener('pointerup', onUp);
+  window.addEventListener('pointercancel', onCancel);
 }
 
 function renderTodos() {
@@ -318,7 +454,7 @@ function renderTodos() {
     dragBtn.addEventListener('pointerdown', event => {
       event.stopPropagation();
       if (!isEditMode) return;
-      row.draggable = true;
+      beginTodoPointerDrag(event, id, row);
     });
     dragBtn.addEventListener('click', event => event.stopPropagation());
     row.addEventListener('dragstart', event => {
@@ -348,12 +484,91 @@ function renderTodos() {
       row.classList.remove('is-drop-target');
       const sourceId = event.dataTransfer.getData('text/plain') || draggingItemId;
       if (!sourceId || sourceId === id) return;
-      reorderTodo(sourceId, id);
+      const rect = row.getBoundingClientRect();
+      const placement = event.clientY > rect.top + rect.height / 2 ? 'after' : 'before';
+      reorderTodo(sourceId, id, placement);
       applySequentialOneHourTimes();
       renderTodos();
       await saveCurrentDay();
     });
   });
+}
+
+function beginTodoPointerDrag(event, id, row) {
+  if (event.button !== 0) return;
+  event.preventDefault();
+  const state = {
+    id,
+    row,
+    pointerId: event.pointerId,
+    startX: event.clientX,
+    startY: event.clientY,
+    moved: false,
+    targetRow: null,
+    placement: 'before',
+  };
+  todoPointerDrag = state;
+
+  const clearTarget = () => {
+    els.todos.querySelectorAll('.todo.is-drop-target').forEach(item => item.classList.remove('is-drop-target'));
+  };
+
+  const updateTarget = pointerEvent => {
+    clearTarget();
+    const target = document.elementFromPoint(pointerEvent.clientX, pointerEvent.clientY)?.closest('.todo');
+    if (!target || !els.todos.contains(target) || target.dataset.id === id) {
+      state.targetRow = null;
+      return;
+    }
+    const rect = target.getBoundingClientRect();
+    state.targetRow = target;
+    state.placement = pointerEvent.clientY > rect.top + rect.height / 2 ? 'after' : 'before';
+    target.classList.add('is-drop-target');
+  };
+
+  const cleanup = () => {
+    window.removeEventListener('pointermove', onMove);
+    window.removeEventListener('pointerup', onUp);
+    window.removeEventListener('pointercancel', onCancel);
+    clearTarget();
+    row.classList.remove('is-dragging');
+    todoPointerDrag = null;
+  };
+
+  const onMove = pointerEvent => {
+    if (pointerEvent.pointerId !== state.pointerId) return;
+    const dx = Math.abs(pointerEvent.clientX - state.startX);
+    const dy = Math.abs(pointerEvent.clientY - state.startY);
+    if (dx > 4 || dy > 4) {
+      state.moved = true;
+      row.classList.add('is-dragging');
+    }
+    if (state.moved) {
+      pointerEvent.preventDefault();
+      updateTarget(pointerEvent);
+    }
+  };
+
+  const onUp = async pointerEvent => {
+    if (pointerEvent.pointerId !== state.pointerId) return;
+    const targetId = state.targetRow?.dataset.id;
+    const placement = state.placement;
+    cleanup();
+    if (!state.moved || !targetId || targetId === id) return;
+    reorderTodo(id, targetId, placement);
+    applySequentialOneHourTimes();
+    renderTodos();
+    await saveCurrentDay();
+  };
+
+  const onCancel = pointerEvent => {
+    if (pointerEvent.pointerId !== state.pointerId) return;
+    cleanup();
+  };
+
+  window.addEventListener('pointermove', onMove);
+  window.addEventListener('pointerup', onUp);
+  window.addEventListener('pointercancel', onCancel);
 }
 
 async function toggleTodo(id) {
@@ -371,6 +586,7 @@ function setEditMode(nextValue) {
   els.editModeToggle.setAttribute('aria-pressed', String(isEditMode));
   if (!isEditMode) {
     draggingItemId = null;
+    todoPointerDrag = null;
     els.todos.querySelectorAll('.todo').forEach(row => {
       row.draggable = false;
       row.classList.remove('is-dragging', 'is-drop-target');
@@ -400,7 +616,7 @@ function closeTaskEditor() {
 function openEvergreenEditor(id = null) {
   const item = evergreenItems.find(entry => entry.id === id);
   editingEvergreenId = item ? item.id : null;
-  els.evergreenDialogTitle.textContent = item ? 'Edit important item' : 'New important item';
+  els.evergreenDialogTitle.textContent = item ? 'Edit long-term item' : 'New long-term item';
   els.evergreenInput.value = item?.text || '';
   els.evergreenPriority.value = normalizePriority(item?.priority);
   els.evergreenStatus.value = normalizeEvergreenStatus(item?.status, item?.completed);
@@ -413,6 +629,14 @@ function closeEvergreenEditor() {
   editingEvergreenId = null;
   if (els.evergreenDialog.open && typeof els.evergreenDialog.close === 'function') els.evergreenDialog.close();
   else els.evergreenDialog.removeAttribute('open');
+}
+
+function setEvergreenEditMode(nextValue) {
+  isEvergreenEditMode = Boolean(nextValue);
+  document.body.classList.toggle('long-term-edit-mode', isEvergreenEditMode);
+  els.evergreenEditModeToggle.classList.toggle('is-active', isEvergreenEditMode);
+  els.evergreenEditModeToggle.setAttribute('aria-pressed', String(isEvergreenEditMode));
+  renderEvergreen();
 }
 
 async function addEvergreenFromForm(event) {
@@ -428,7 +652,7 @@ async function addEvergreenFromForm(event) {
     createdAt: new Date().toISOString(),
   });
   els.evergreenQuickInput.value = '';
-  sortEvergreen();
+  normalizeEvergreenOrder();
   renderEvergreen();
   await saveEvergreen();
 }
@@ -462,7 +686,7 @@ async function saveEvergreenEditor() {
   }
 
   closeEvergreenEditor();
-  sortEvergreen();
+  normalizeEvergreenOrder();
   renderEvergreen();
   await saveEvergreen();
 }
@@ -731,13 +955,14 @@ function openDeleteAllUserCheckDialog() {
   });
 }
 
-function reorderTodo(sourceId, targetId) {
+function reorderTodo(sourceId, targetId, placement = 'before') {
   const from = dayItems.findIndex(item => item.id === sourceId);
-  const to = dayItems.findIndex(item => item.id === targetId);
-  if (from < 0 || to < 0 || from === to) return;
+  const target = dayItems.findIndex(item => item.id === targetId);
+  if (from < 0 || target < 0 || from === target) return;
   const [moved] = dayItems.splice(from, 1);
   const nextTargetIndex = dayItems.findIndex(item => item.id === targetId);
-  dayItems.splice(nextTargetIndex, 0, moved);
+  const insertAt = nextTargetIndex + (placement === 'after' ? 1 : 0);
+  dayItems.splice(insertAt, 0, moved);
 }
 
 function applySequentialOneHourTimes() {
@@ -759,12 +984,13 @@ async function loadEvergreen() {
     const data = await res.json();
     evergreenItems = normalizeEvergreenItems(data);
     sortEvergreen();
+    normalizeEvergreenOrder();
     renderEvergreen();
   } catch (error) {
     console.error('[daily] evergreen load error', error);
     evergreenItems = [];
     renderEvergreen();
-    setStatus('Important load failed', 'error');
+    setStatus('Long-term load failed', 'error');
   }
 }
 
@@ -807,7 +1033,7 @@ async function saveEvergreen() {
     setStatus('Saved');
   } catch (error) {
     console.error('[daily] evergreen save error', error);
-    setStatus('Important save failed', 'error');
+    setStatus('Long-term save failed', 'error');
   }
 }
 
@@ -859,6 +1085,7 @@ function normalizeEvergreenItems(items) {
         status,
         completed: status === 'done' || Boolean(item.completed),
         createdAt: item.createdAt || new Date().toISOString(),
+        order: Number.isFinite(Number(item.order)) ? Number(item.order) : null,
       };
     })
     .filter(item => item.text);
@@ -876,12 +1103,35 @@ function sortEvergreen() {
   const priorityWeight = { high: 0, medium: 1, low: 2 };
   const statusWeight = { active: 0, paused: 1, done: 2, archived: 3 };
   evergreenItems.sort((a, b) => {
+    const aOrder = Number(a.order);
+    const bOrder = Number(b.order);
+    const aHasOrder = Number.isFinite(aOrder);
+    const bHasOrder = Number.isFinite(bOrder);
+    if (aHasOrder && bHasOrder && aOrder !== bOrder) return aOrder - bOrder;
+    if (aHasOrder && !bHasOrder) return -1;
+    if (!aHasOrder && bHasOrder) return 1;
     const byStatus = (statusWeight[normalizeEvergreenStatus(a.status, a.completed)] ?? 9) - (statusWeight[normalizeEvergreenStatus(b.status, b.completed)] ?? 9);
     if (byStatus !== 0) return byStatus;
     const byPriority = (priorityWeight[normalizePriority(a.priority)] ?? 9) - (priorityWeight[normalizePriority(b.priority)] ?? 9);
     if (byPriority !== 0) return byPriority;
     return String(a.createdAt || '').localeCompare(String(b.createdAt || ''));
   });
+}
+
+function normalizeEvergreenOrder() {
+  evergreenItems.forEach((item, index) => {
+    item.order = index;
+  });
+}
+
+function reorderEvergreen(sourceId, targetId, placement = 'before') {
+  const from = evergreenItems.findIndex(item => item.id === sourceId);
+  const target = evergreenItems.findIndex(item => item.id === targetId);
+  if (from < 0 || target < 0 || from === target) return;
+  const [moved] = evergreenItems.splice(from, 1);
+  const nextTargetIndex = evergreenItems.findIndex(item => item.id === targetId);
+  const insertAt = nextTargetIndex + (placement === 'after' ? 1 : 0);
+  evergreenItems.splice(insertAt, 0, moved);
 }
 
 function updateDateHeader() {
@@ -964,6 +1214,7 @@ function connectWs() {
     const dateKey = formatDate(currentDate);
     evergreenItems = normalizeEvergreenItems(payload._evergreen || []);
     sortEvergreen();
+    normalizeEvergreenOrder();
     dayItems = normalizeItems(payload[dateKey] || []);
     sortItems();
     renderEvergreen();

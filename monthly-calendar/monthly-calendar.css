@@ -47,6 +47,11 @@
     color: #333;
     text-decoration: none;
   }
+  .week-link i,
+  .week-link i::before {
+    display: block;
+    line-height: 1;
+  }
   .week-link .btn-word {
     font-size: 15px;
     font-weight: 900;

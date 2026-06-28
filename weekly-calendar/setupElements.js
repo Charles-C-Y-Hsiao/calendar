@@ -7,12 +7,23 @@
   if (userNameSpan) {
     userNameSpan.textContent = `Hi, ${user_name}`;
   }
+  updateModeLinks();
 
   bindCalendarUserStorageSync((nextUserId) => {
     if (nextUserId === user_name) return;
     user_name = nextUserId;
+    updateModeLinks();
     location.reload();
   });
+
+  function updateModeLinks() {
+    const q = `?userId=${encodeURIComponent(user_name)}`;
+    const monthLink = document.getElementById('monthModeLink');
+    const dayLink = document.getElementById('dayModeLink');
+    if (monthLink) monthLink.href = `/month/${q}`;
+    if (dayLink) dayLink.href = `/day/${q}`;
+  }
+  window.updateModeLinks = updateModeLinks;
 
   function setStatus(text, cls = '') {
     const statusEl = document.getElementById('save-status');

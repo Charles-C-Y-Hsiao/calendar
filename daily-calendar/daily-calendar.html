@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Daily Calendar</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <!--flaticon cdn-->
   <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
+  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-chubby/css/uicons-regular-chubby.css">
   <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-bold-straight/css/uicons-bold-straight.css">
   <link rel="stylesheet" href="daily-calendar.css">
 </head>
@@ -14,11 +16,12 @@
     <header class="dailybar">
       <nav class="mode-links">
         <a class="mode-link" id="weekLink" href="/week/">
-          <i class="fa-regular fa-calendar-days"></i>
+          <i class="fi fi-rc-calendar-week"></i>
           <span>week-mode</span>
         </a>
         <a class="mode-link" id="monthLink" href="/month/">
-          <i class="fa-regular fa-calendar"></i>
+          <!-- <i class="fa-regular fa-calendar"></i> -->
+          <i class="fa-regular fa-calendar-days"></i>
           <span>month-mode</span>
         </a>
       </nav>
@@ -86,7 +89,7 @@
         </div>
       </section>
 
-      <section class="evergreen-section" aria-label="Important items">
+      <section class="evergreen-section" aria-label="Long-term items">
         <div class="section-head evergreen-head">
           <h2>Long-term items</h2>
         </div>
@@ -95,10 +98,15 @@
             <span>Task</span>
             <input id="evergreenQuickInput" class="todo-input" type="text" autocomplete="off" placeholder="Add a new task...">
           </label>
-          <button class="add-button" id="evergreenAdd" type="submit" title="Add important item">
+          <button class="add-button" id="evergreenAdd" type="submit" title="Add long-term item">
             <i class="fi fi-bs-add"></i>
           </button>
         </form>
+        <div class="evergreen-tools" aria-label="Long-term item tools">
+          <button class="edit-mode-toggle" type="button" id="evergreenEditModeToggle" title="Edit mode" aria-pressed="false">
+            <i class="fi fi-rr-settings-sliders"></i>
+          </button>
+        </div>
         <ul class="evergreen-list" id="evergreenList"></ul>
         <div class="evergreen-empty" id="evergreenEmpty">No important items</div>
       </section>
@@ -126,7 +134,7 @@
     <button class="dialog-close" id="evergreenClose" type="button" title="Close">
       <i class="fa-regular fa-circle-xmark"></i>
     </button>
-    <h2 id="evergreenDialogTitle">Important item</h2>
+    <h2 id="evergreenDialogTitle">Long-term item</h2>
     <div class="evergreen-edit-grid">
       <label>
         <span>Item</span>

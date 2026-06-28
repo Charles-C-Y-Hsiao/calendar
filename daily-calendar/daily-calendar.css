@@ -75,6 +75,12 @@ select {
 }
 
 .mode-link i,
+.mode-link i::before {
+  display: block;
+  line-height: 1;
+}
+
+.mode-link i,
 .user-button i {
   font-size: 20px;
 }
@@ -216,11 +222,17 @@ select {
   font-weight: 800;
 }
 
+.evergreen-tools {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 18px;
+}
+
 .evergreen-list {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 9px;
   margin: 0;
   padding: 0;
   max-height: 524px;
@@ -230,14 +242,23 @@ select {
 
 .evergreen-item {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
-  min-height: 48px;
+  min-height: 52px;
   border: 1px solid #dbe1ee;
   border-radius: 8px;
   background: #fffdf5;
   padding: 8px 10px;
+}
+
+.evergreen-item.is-dragging {
+  opacity: .45;
+}
+
+.evergreen-item.is-drop-target {
+  border-color: #4f46e5;
+  box-shadow: inset 0 0 0 2px rgba(79, 70, 229, .18);
 }
 
 .evergreen-item.is-done {
@@ -251,9 +272,19 @@ select {
 }
 
 .evergreen-check {
+  display: none;
   width: 18px;
   height: 18px;
   accent-color: #0a7;
+}
+
+.evergreen-drag {
+  opacity: .66;
+  cursor: grab;
+}
+
+.evergreen-drag:active {
+  cursor: grabbing;
 }
 
 .evergreen-main {
@@ -273,7 +304,7 @@ select {
 }
 
 .evergreen-meta {
-  display: flex;
+  display: none;
   flex-wrap: wrap;
   gap: 6px;
   margin-top: 3px;
@@ -305,7 +336,7 @@ select {
 }
 
 .evergreen-actions {
-  display: inline-flex;
+  display: none;
   align-items: center;
   justify-content: flex-end;
   gap: 2px;
@@ -330,6 +361,18 @@ select {
 .evergreen-actions .evergreen-delete:hover {
   background: rgba(239, 68, 68, .12);
   color: #dc2626;
+}
+
+.long-term-edit-mode .evergreen-check {
+  display: block;
+}
+
+.long-term-edit-mode .evergreen-drag {
+  display: none;
+}
+
+.long-term-edit-mode .evergreen-actions {
+  display: inline-flex;
 }
 
 .evergreen-empty {
@@ -613,6 +656,14 @@ select {
 
 .daily-edit-mode .drag-btn {
   display: inline-flex;
+}
+
+.evergreen-drag {
+  display: inline-flex;
+}
+
+.long-term-edit-mode .evergreen-drag {
+  display: none;
 }
 
 .drag-btn:active {

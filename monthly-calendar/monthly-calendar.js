@@ -50,13 +50,13 @@
 
       // const left_btn = document.querySelector(".btn.left");
       // left_btn.innerHTML = left_SVG;
-
+      // <i class="fa-regular fa-calendar"></i>
       const calendarHTML = `
         <div class="calendar">
         <div class="calendar-body">
           <div class="calendar-header">
             <a href="/week/" class="week-link" title="切換到週曆">
-              <i class="fa-regular fa-calendar"></i><span class="btn-word">week-mode</span>
+              <i class="fi fi-rc-calendar-week"></i><span class="btn-word">week-mode</span>
             </a>
             <div class="server-actions">
               <span id="save-status" class="status">—</span>

@@ -66,10 +66,14 @@
   <body>
     <div class="board">
       <div class="weekbar">
-        <!-- <a href="http://localhost:3010/month/" class="month-link"> -->
-        <a href="/month/" class="month-link">
-          <i class="fa-regular fa-calendar-days"></i><span class="btn-word">month-mode</span>
-        </a>
+        <nav class="mode-links" aria-label="Calendar view modes">
+          <a href="/month/" class="mode-link month-link" id="monthModeLink">
+            <i class="fa-regular fa-calendar-days"></i><span class="btn-word">month-mode</span>
+          </a>
+          <a href="/day/" class="mode-link day-link" id="dayModeLink">
+            <i class="fi fi-rc-calendar-day"></i><span class="btn-word">day-mode</span>
+          </a>
+        </nav>
         <div class="server-actions">
           <span id="save-status" class="status">—</span>
         </div>

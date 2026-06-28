@@ -409,3 +409,52 @@
     /* topbar 每天顯示「日期 + 星期」 */
     .topbar .cell .date{ display:block; font-weight:700; }
     .topbar .cell .wk  { display:block; font-size:12px; color:#6b7280; }
+
+    .mode-links {
+        position: absolute;
+        left: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .mode-links i,
+    .mode-links i::before {
+        display: block;
+        line-height: 1;
+    }
+
+    .mode-links .mode-link {
+        position: static;
+        left: auto;
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+        padding: 4px 8px;
+        cursor: pointer;
+        color: #333;
+        text-decoration: none;
+        border-radius: 8px;
+    }
+
+    .mode-links .mode-link i {
+        font-size: 20px;
+        line-height: 1;
+    }
+
+    .mode-links .mode-link .btn-word {
+        font-size: 15px;
+        font-weight: 900;
+        margin-left: 5px;
+        user-select: none;
+    }
+
+    .mode-links .mode-link:hover {
+        color: #4f46e5;
+        background: rgba(79, 70, 229, .08);
+        text-decoration: none;
+    }
+
+    .server-actions {
+        left: 245px;
+    }
