@@ -1,0 +1,98 @@
+/* ===== msg_panel overlay & dialog ===== */
+.msg_panel-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.msg_panel {
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px 20px;
+  min-width: 320px;
+  max-width: 420px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.msg_panel-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.msg_panel-subtitle {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.msg_panel-content {
+  font-size: 14px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  /* background: #f5f5f7; */
+  border: 1px solid #e0e0e0;
+  word-break: break-all;
+  margin-bottom: 10px;
+}
+
+.msg_panel-count {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums; /* 數字等寬更整齊 */
+}
+
+
+.msg_panel-label {
+  font-size: 12px;
+  color: #555;
+  margin-bottom: 4px;
+}
+
+.msg_panel-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.msg_panel-actions button {
+  min-width: 80px;
+  font-weight: 600;
+  padding: 6px 12px;
+  font-size: 15px;
+  border-radius: 18px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  border: none;
+  cursor: pointer;
+}
+
+.msg_panel-actions .msg_panel-submit {
+  background: #1a73e8;
+  color: #fff;
+}
+
+.msg_panel-actions .msg_panel-cancel {
+  background: #e4e4e4;
+  color: #333;
+}
+
+.msg_panel-actions .msg_panel-close {
+  background: #ff66a3;         /* 粉紅色 */
+  color: #fff;                 /* 白字 */
+  transition: background 0.2s ease;
+}
+
+.msg_panel-actions .msg_panel-close:hover {
+  background: #ff4d94;         /* hover 深一點的粉紅 */
+}
+
+.msg_panel-actions .msg_panel-close:active {
+  background: #e63978;         /* active 再深一點 */
+}

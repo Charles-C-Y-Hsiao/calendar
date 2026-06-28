@@ -1,0 +1,271 @@
+﻿  <!DOCTYPE html>
+  <html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Weekly Calendar</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Font Awesome嚗?賂??芷???內?剁? -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-thin-rounded/css/uicons-thin-rounded.css">
+    <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
+    <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-chubby/css/uicons-regular-chubby.css">
+
+    <!-- interact.js -->
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+
+    <!-- dayjs嚗??撘?嚗?-->
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+
+    <link rel="stylesheet" href="weekly-calendar.css" />
+    <link rel="stylesheet" href="open-dialog.css" />
+    <link rel="stylesheet" href="recurring-schedule.css" />
+    <link rel="stylesheet" href="availability-schedule.css" />
+
+    <link rel="stylesheet" href="login-input.css" />
+    <link rel="stylesheet" href="login-buttons.css" />
+    <link rel="stylesheet" href="login-msg_panel.css" />
+
+    <style>
+      :root{
+        --hourHeight: 64px;    /* 瘥???摨?*/
+        --slot: 30;            /* 瘥撟曉???30 = ????*/
+        --slotHeight: calc(var(--hourHeight) * var(--slot) / 60); /* 瘥?? */
+        --days: 7;
+        --dayWidth: 140px;     /* 瘥予甈祝 */
+        --headerH: 42px;       /* 憭拇?憿?摨?*/
+        --rulerW: 70px;        /* 撌血??撠箏祝 */
+        --gap: 1px;
+        --bg: #fff;
+        --line: #e7e7ea;
+        --accent: #4f46e5;
+        --block: #eef2ff;
+        --block-border: #c7d2fe;
+        --block-text: #111827;
+        --gray-deep:  #c7d2fe;  /* 瘛梁嚗??＊????????*/
+        --gray-mid:   #d9dbe9;  /* 銝剔嚗over ????*/
+        --gray-light: #ececf3;  /* 瘛箇嚗蜓閬???*/
+        --gray-soft:  #f5f5f8;  /* ?瘛∠嚗? #fafafa ?湔?摮??*/
+      }
+
+      * { 
+        box-sizing: border-box; 
+        font-family: "calibri", sans-serif;
+        /* font-family: ui-sans-serif, system-ui, "Segoe UI", 'PingFang TC', 'Microsoft JhengHei', Arial;  */
+      }
+      body {
+        margin: 0; background: #f6f7fb; color: #222;
+        display: grid; place-items: start center; 
+        padding: 24px;
+        min-height: 100vh;
+        position: relative;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div class="board">
+      <div class="weekbar">
+        <!-- <a href="http://localhost:3010/month/" class="month-link"> -->
+        <a href="/month/" class="month-link">
+          <i class="fa-regular fa-calendar-days"></i><span class="btn-word">month-mode</span>
+        </a>
+        <div class="server-actions">
+          <span id="save-status" class="status">—</span>
+        </div>
+        <button class="btn-dir left"  id="btnPrevWeek" title="上一週"></button>
+        <span class="range" id="weekRange"></span>
+        <button class="btn-dir right" id="btnNextWeek" title="下一週"></button>
+        <div class="weekbar-user-tools">
+          <button type="button" class="bulk-schedule-btn invite-btn" title="Availability">
+            <i class="fi fi-rr-invite-alt"></i>
+          </button>
+          <button type="button" class="bulk-schedule-btn" id="bulkScheduleBtn" title="?寞活?箏?隞餃?">
+            <i class="fi fi-rr-admin-alt"></i>
+          </button>
+          <a href="#" class="user_name_popup" id ="show-user-name">
+            <span class="btn-word">Hi, 00666888</span><i class="fa-regular fa-user"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="topbar" id="topbar">
+        <div class="cell ruler">時間</div>
+        <!-- 7 憭拇?憿???JS ??撱箇? -->
+      </div>
+
+      <div class="content" id="content">
+        <div class="ruler" id="ruler"></div>
+        <!-- 7 憭拇?雿???JS ??撱箇? -->
+      </div>
+    </div>
+    <div class="user-dialog-overlay" id="user-dialog-overlay"></div>
+    <div class="user-dialog">
+      <div style="display: flex; flex-direction: column; padding: 10px 13px;
+      border-radius: 10px; box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.2); background: #fff;">
+        <!-- <label for="textInput">隢撓???摮?頞??＊蝷箄郎??</label> -->
+        <div id="dialog-close">
+            <a><div id="dialog-close-btn"><i class="fa-regular fa-circle-xmark"></i></div></a>
+        </div>
+        <!-- <i class="fa-solid fa-xmark"></i> -->
+          <div style="display: flex; justify-content: space-between;">
+            <div id="counter">撌脰撓??0 / 8 number</div>
+            <!-- <div id="warningText">?? 頞?摮嚗?蝣箄??批捆嚗?/div> -->
+            <div id="warningText">?? Input too long. Please check!</div>
+          </div>
+        <div class="input-box">
+          <input type="text" id="textInput" maxlength="100" required autocomplete="off">
+          <label class="hint-wording">login-in name</label>
+        </div>
+        <div style="display: flex; justify-content: space-between; gap:8px; margin-top: 5px;">
+          <button type="button" class="btn btn-bright-green btn-column"><i class="fa-solid fa-broom"></i><span class="btn-small-wording">clear</span></button>
+          <button type="button" class="btn btn-primary">Log-in</button>
+        </div>
+      </div>
+    </div>
+    <script src="calendar-account.js"></script>
+    <script src="setupElements.js"></script>
+    <script src="TopbarRulerAndDays.js"></script>
+    <script src="CreateGhostOrBlock.js"></script>
+    <script src="interact-drag-resize.js"></script>
+    <script src="PreAndNextWeek.js"></script>
+    <script src="open-dialog.js"></script>
+    <script src="weekly-calendar-core.js"></script>
+    <script src="availability-schedule.js"></script>
+    <script src="recurring-schedule.js"></script>
+    <script src="login-msg_panel.js"></script>
+    <script>
+  
+      /* ===================== ??瘚? ===================== */
+      // Demo 雿輻
+      // function addBlock(setupInteract, { top, height, dayIndex }) {
+      //   const block = createBlockElement({ top, height, dayIndex });
+      //   dayCols[dayIndex].appendChild(block);
+      //   setupInteract(block);
+      //   updateBlockTime(block);
+      //   return block;
+      // }
+      
+      // --- ?曹??箔??梯絲暺??單?望撠望? 1 ??0嚗?--
+      const WEEK_STARTS_ON = 1; // 1=Mon, 0=Sun
+
+      // 撌亙嚗????
+      function startOfWeek(date, weekStartsOn = WEEK_STARTS_ON){
+        const d = new Date(date);
+        const day = d.getDay();
+        const diff = (day - weekStartsOn + 7) % 7; // 敺??圈梯絲暺?
+        d.setDate(d.getDate() - diff);
+        d.setHours(0,0,0,0);
+        return d;
+      }
+      // 雿閬?025-11-02 ?予?舀?梁? SUN?蝷箇??舫見韏瑕?嚗?
+      // const currentRefDate = new Date('2025-11-02');
+      const currentRefDate = new Date(); // 銋?寞?隞予
+      
+      let viewStart = startOfWeek(currentRefDate, WEEK_STARTS_ON); // ?祇梯絲憪??曹?嚗?
+      // console.log({viewStart})
+
+      function updateWeekRangeLabel(){
+        const rangeEl = document.getElementById('weekRange');
+        const from = fmtDate(viewStart);
+        const to   = fmtDate(addDays(viewStart, 6));
+        rangeEl.textContent = `${from} — ${to}`;
+      }
+
+      function connectCalendarWS(setupInteract) {
+        const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+        const wsHost = window.location.hostname;        // 靘? "localhost"
+        // const wsUrl = `${proto}://${location.host}`;   // 靘? ws://localhost:3010
+        const wsUrl = `${proto}://${location.host}/?userId=${encodeURIComponent(user_name)}`;
+        // const wsUrl = `${proto}://${wsHost}:3010/?userId=${encodeURIComponent(user_name)}`;
+        const ws    = new WebSocket(wsUrl);
+
+        ws.addEventListener('open', () => {
+          console.log('[WS] connected (week view)');
+        });
+
+        ws.addEventListener('message', (ev) => {
+          let msg;
+          try {
+            msg = JSON.parse(ev.data);
+          } catch (e) {
+            console.warn('[WS] parse error', e);
+            return;
+          }
+
+          if (msg.type === 'calendar-init') {
+            console.log('trigger calendar-init','viewStart',fmtDate(viewStart), msg.payload)
+            // 銝???撠望?啣???map
+            allSchedules = msg.payload || {};
+            renderWeekFromMap(viewStart, setupInteract, allSchedules, getDayCols);
+            setStatus('已載入 ✓');
+          } else if (msg.type === 'calendar-updated') {
+            if (msg.sourceClientId && msg.sourceClientId === CALENDAR_CLIENT_ID) {
+              console.log('[WS] skip own calendar-updated');
+              return;
+            }
+            console.log('trigger calendar-updated','viewStart',fmtDate(viewStart),msg.payload)
+            // 隞颱?蝔?嚗???嗡?嚗?唳?獢?嚗ㄐ??唳??啣???map
+            allSchedules = msg.payload || {};
+            renderWeekFromMap(viewStart, setupInteract, allSchedules, getDayCols);
+            setStatus('已同步 ✓');
+          }
+        });
+
+        ws.addEventListener('close', () => {
+          console.log('[WS] disconnected, retry in 3s...');
+          setTimeout(connectCalendarWS, 3000);
+        });
+
+        ws.addEventListener('error', (e) => {
+          console.error('[WS] error', e);
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', async () => {
+        // 撠汗?? SVG
+        document.getElementById('btnPrevWeek').innerHTML = left_SVG;
+        document.getElementById('btnNextWeek').innerHTML = right_SVG;
+        
+        // ???Ｙ? topbar / ruler / dayCols嚗??桀? viewStart嚗?
+        initTopbarRulerAndDays(viewStart);
+
+        // ??霈?block ?瑕? drag / resize
+        const setupInteract = initInteractForBlocks({ slotPx, stepY, stepX, getDayCols });
+        window.weeklyCalendarBulkContext = { setupInteract, getDayCols };
+        initCreateGhostOrBlock(setupInteract); // ??day ?扳??遣蝡?ghost / block
+        // ????頛?園?
+        await loadWeek(viewStart, setupInteract, getDayCols);
+        connectCalendarWS(setupInteract);
+        initRecurringScheduleDialog({ setupInteract, getDayCols });
+
+        updateWeekRangeLabel();
+        // ? ??ㄐ
+        // bindKeyboardControls();
+
+        // // demo block
+        // addBlock(setupInteract, { top: slotPx * 6, height: slotPx * 3, dayIndex: 1 });
+
+        // ??撌血??
+        document.getElementById('btnPrevWeek').addEventListener('click', async () => {
+          viewStart = addDays(viewStart, -7);
+          initTopbarRulerAndDays(viewStart);
+          const _setup = initInteractForBlocks({ slotPx, stepY, stepX, getDayCols });
+          window.weeklyCalendarBulkContext = { setupInteract: _setup, getDayCols };
+          initCreateGhostOrBlock(_setup);
+          await loadWeek(viewStart, _setup, getDayCols);
+          updateWeekRangeLabel();
+        });
+        document.getElementById('btnNextWeek').addEventListener('click', async () => {
+          viewStart = addDays(viewStart, +7);
+          initTopbarRulerAndDays(viewStart);
+          const _setup = initInteractForBlocks({ slotPx, stepY, stepX, getDayCols });
+          window.weeklyCalendarBulkContext = { setupInteract: _setup, getDayCols };
+          initCreateGhostOrBlock(_setup);
+          await loadWeek(viewStart, _setup, getDayCols);
+          updateWeekRangeLabel();
+        });
+      });
+    </script>
+  </body>
+  </html>

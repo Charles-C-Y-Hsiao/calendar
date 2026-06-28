@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Daily Calendar</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
+  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-bold-straight/css/uicons-bold-straight.css">
+  <link rel="stylesheet" href="daily-calendar.css">
+</head>
+<body>
+  <main class="daily-board">
+    <header class="dailybar">
+      <nav class="mode-links">
+        <a class="mode-link" id="weekLink" href="/week/">
+          <i class="fa-regular fa-calendar-days"></i>
+          <span>week-mode</span>
+        </a>
+        <a class="mode-link" id="monthLink" href="/month/">
+          <i class="fa-regular fa-calendar"></i>
+          <span>month-mode</span>
+        </a>
+      </nav>
+
+      <section class="date-switcher" aria-label="Date navigation">
+        <button class="date-heading" id="dateTitleButton" type="button">
+          <span>
+            <strong id="dateTitle">Daily Calendar</strong>
+            <small id="weekdayLabel">MON</small>
+          </span>
+          <input id="datePicker" type="date" aria-label="Pick date">
+        </button>
+      </section>
+
+      <section class="user-tools">
+        <span id="save-status" class="status">-</span>
+        <button class="user-button" id="show-user-name" type="button">
+          <span class="btn-word">Hi, 00666888</span>
+          <i class="fa-regular fa-user"></i>
+        </button>
+      </section>
+    </header>
+
+    <section class="todo-panel">
+      <section class="timed-section" aria-label="Timed tasks">
+        <div class="section-head">
+          <h2>Daily Items</h2>
+        </div>
+        <form class="todo-form" id="todoForm">
+          <div class="time-pair">
+            <label>
+              <span>Start</span>
+              <select id="startTime"></select>
+            </label>
+            <label>
+              <span>End</span>
+              <select id="endTime"></select>
+            </label>
+          </div>
+          <label class="task-input-wrap">
+            <span>Task</span>
+            <input id="taskInput" class="todo-input" type="text" autocomplete="off" placeholder="Add a new task...">
+          </label>
+          <button class="add-button" type="submit" title="Add task">
+            <i class="fi fi-bs-add"></i>
+          </button>
+        </form>
+
+        <div class="filters" aria-label="Task filters">
+          <button class="filter active" type="button" data-filter="all">All</button>
+          <button class="filter" type="button" data-filter="completed">Complete</button>
+          <button class="filter" type="button" data-filter="pending">Incomplete</button>
+          <button class="edit-mode-toggle" type="button" id="editModeToggle" title="Edit mode" aria-pressed="false">
+            <i class="fi fi-rr-settings-sliders"></i>
+          </button>
+          <button class="delete-all" type="button" id="deleteAll">Delete All</button>
+        </div>
+
+        <div class="todos-container">
+          <ul class="todos" id="todos"></ul>
+          <div class="empty-state" id="emptyState">
+            <i class="fa-regular fa-calendar-check"></i>
+            <span>No tasks for this day</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="evergreen-section" aria-label="Important items">
+        <div class="section-head evergreen-head">
+          <h2>Long-term items</h2>
+        </div>
+        <form class="evergreen-form" id="evergreenForm">
+          <label class="task-input-wrap">
+            <span>Task</span>
+            <input id="evergreenQuickInput" class="todo-input" type="text" autocomplete="off" placeholder="Add a new task...">
+          </label>
+          <button class="add-button" id="evergreenAdd" type="submit" title="Add important item">
+            <i class="fi fi-bs-add"></i>
+          </button>
+        </form>
+        <ul class="evergreen-list" id="evergreenList"></ul>
+        <div class="evergreen-empty" id="evergreenEmpty">No important items</div>
+      </section>
+    </section>
+  </main>
+
+  <div class="user-dialog-overlay" id="user-dialog-overlay"></div>
+  <dialog class="user-dialog" id="userDialog">
+    <button class="dialog-close" id="dialog-close-btn" type="button" title="Close">
+      <i class="fa-regular fa-circle-xmark"></i>
+    </button>
+    <h2>Account</h2>
+    <p>Use 8 digits to switch and remember the calendar account.</p>
+    <input id="textInput" type="text" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="00000000">
+    <div class="dialog-actions">
+      <button class="secondary" id="clearUser" type="button">
+        <i class="fa-solid fa-broom"></i>
+        <span>Clear</span>
+      </button>
+      <button class="primary" id="loginUser" type="button">Log-in</button>
+    </div>
+  </dialog>
+
+  <dialog class="task-edit-dialog" id="evergreenDialog">
+    <button class="dialog-close" id="evergreenClose" type="button" title="Close">
+      <i class="fa-regular fa-circle-xmark"></i>
+    </button>
+    <h2 id="evergreenDialogTitle">Important item</h2>
+    <div class="evergreen-edit-grid">
+      <label>
+        <span>Item</span>
+        <input id="evergreenInput" type="text" autocomplete="off" placeholder="Add a long-term item...">
+      </label>
+      <label>
+        <span>Priority</span>
+        <select id="evergreenPriority">
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+      </label>
+      <label>
+        <span>Status</span>
+        <select id="evergreenStatus">
+          <option value="active">Active</option>
+          <option value="paused">Paused</option>
+          <option value="done">Done</option>
+          <option value="archived">Archived</option>
+        </select>
+      </label>
+    </div>
+    <div class="dialog-actions">
+      <button class="secondary" id="evergreenCancel" type="button">Cancel</button>
+      <button class="primary" id="evergreenSave" type="button">Save</button>
+    </div>
+  </dialog>
+
+  <dialog class="task-edit-dialog" id="taskEditDialog">
+    <button class="dialog-close" id="taskEditClose" type="button" title="Close">
+      <i class="fa-regular fa-circle-xmark"></i>
+    </button>
+    <h2>Edit task</h2>
+    <div class="task-edit-grid">
+      <label>
+        <span>Start</span>
+        <select id="editStartTime"></select>
+      </label>
+      <label>
+        <span>End</span>
+        <select id="editEndTime"></select>
+      </label>
+      <label class="edit-task-field">
+        <span>Task</span>
+        <input id="editTaskInput" type="text" autocomplete="off">
+      </label>
+    </div>
+    <div class="dialog-actions">
+      <button class="secondary" id="taskEditCancel" type="button">Cancel</button>
+      <button class="primary" id="taskEditSave" type="button">Save</button>
+    </div>
+  </dialog>
+
+  <script src="daily-calendar.js"></script>
+</body>
+</html>

@@ -1,0 +1,228 @@
+  /* ── 多筆清單容器：每格底部卡片 ── */
+  .task-list {
+    /* width: 100%; */
+    width: calc(100% - 4px);
+    margin-top: 1px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 55px; /* 3 行 */
+  }
+
+  .task-list::-webkit-scrollbar-track  {
+    /* background: rgb(30, 30, 30); */
+    border: 1px solid #999;
+    border-radius: 20px;
+  }
+
+  .task-list::-webkit-scrollbar  {
+    width: 0;
+  }
+
+  .task-list:hover::-webkit-scrollbar  {
+    width: 7px;
+  }
+
+  .task-list::-webkit-scrollbar-thumb  {
+    background: #8B8B8B; 
+    border-radius: 20px;
+  }
+  .task-list:hover::-webkit-scrollbar-thumb  {
+    background: #636363; 
+  }
+
+  /* .task-list:hover {
+    outline: 2px solid rgba(211,212,213,.5);
+    outline-offset: 0px;
+    border-radius: 3px;
+  } */
+  /* 放在 CSS：點到 task-list 時看得到已聚焦 */
+  /* .task-list:focus {
+    outline: 2px solid #0034c4;
+    outline-offset: 2px;
+    border-radius: 3px;
+  } */
+
+
+  /* 每一筆 */
+  .task-item {
+    /* display: grid; */
+    /* 拖曳把手 | 輸入 | 刪除 */
+    /* grid-template-columns: 22px 1fr 22px;  */
+    display: flex;
+
+    align-items: center;
+    gap: 2px;
+    /* padding: 2px 3px; */
+    border: 0.5px solid #e0e0e0;
+    border-radius: 8px;
+    background: #fff;
+    margin-inline: 1px;
+  }
+
+  /* 輸入框沿用你的視覺 */
+  .task-item .task-text {
+    width: 100%;
+    /* flex: 1; */
+    text-align: left;
+    /* border: 1px solid #e0e0e0; */
+    border: none;
+    border-radius: 6px;
+    padding: 1px 8px 1px 5px;
+    font-size: 12px;
+    outline: none; 
+
+    /* 🔽 新增這三行即可限制在一行顯示 + 省略號 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    /* 🔽 這行讓容器寬度只容納約 10 個中文字（每個字約 1em） */
+    /* max-width: 20em; */
+  }
+  .task-item .task-text.time {
+    border: none;
+    padding: 0;
+    width: 50px;
+  }
+
+  /* .task-item input {
+    width: 100%;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 12px;
+    outline: none;
+  } */
+
+  .task-item .task-text:focus {
+    border-color: #0034c4;
+    box-shadow: 0 0 0 3px rgba(0,52,196,.1);
+  }
+
+  /* .task-item input:focus {
+    border-color: #0034c4;
+    box-shadow: 0 0 0 3px rgba(0,52,196,.1);
+  } */
+
+  /* 左下角 + 按鈕 */
+  .task-add-btn {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;              /* 不要蓋到 .month 那條 */
+    width: 22px;
+    /* height: 22px; */
+    border: 1px solid #e0e0e0;
+    border-radius: 50%;
+    background: #fff;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,.06);
+
+    /* toggle效果 */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .15s ease;
+    /* toggle效果 */
+  }
+  .task-add-btn.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+  .task-add-btn:hover { box-shadow: 0 3px 10px rgba(0,0,0,.12); }
+
+  /* 左下角 + 按鈕 */
+  .task-edit-btn {
+    position: absolute;
+    right: 5px;
+    bottom: 5px;              /* 不要蓋到 .month 那條 */
+    width: 22px;
+    /* height: 22px; */
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    background: #fff;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,.06);
+
+    /* toggle效果 */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .15s ease;
+    /* toggle效果 */
+  }
+  .task-edit-btn.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+  .task-edit-btn:hover { box-shadow: 0 3px 10px rgba(0,0,0,.12); }
+
+  /* 圖示按鈕（拖曳／刪除） */
+  .icon-btn {
+    width: 20px;
+    /* height: 22px; */
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    border-radius: 6px;
+  }
+  .icon-btn:hover { background: #f2f4f7; }
+
+  /* 預設隱藏 task 內的 icon（拖曳把手與刪除鍵） */
+  .task-item .icon-btn {
+    opacity: 0;
+    visibility: hidden;
+    display: none;
+    transition: opacity .15s ease;
+  }
+
+  /* 只有被點選的 task-item 才顯示 icon */
+  .task-item.selected .icon-btn {
+    opacity: 1;
+    visibility: visible;
+    display: grid;
+  }
+
+  /* 拖曳時也強制顯示（避免抓不到把手） */
+  .task-item.dragging .icon-btn {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* 略微強調被選中的 row（可選） */
+  .task-item.selected {
+    box-shadow: 0 0 0 2px rgba(0,52,196,.08);
+    border-color: #c9d6ff;
+  }
+
+  /* 拖曳中效果 */
+  .task-item.dragging {
+    opacity: .6;
+    border-style: dashed;
+  }
+
+  /* 讓 li 本身要能放下內容：你已經有 position:relative；此處保留提醒 */
+  li[data-tooltip] { position: relative; }
+
+  /* 調整 .month 區塊與清單不擠在一起 */
+  li[data-tooltip] .month { margin-bottom: 0px; }
+
+  /* 讓事項輸入框固定在每格底部、好看又不擋標題 */
+  .day-task-input {
+    width: calc(100% - 5px);
+    padding: 4px 8px;
+    font-size: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    background: #fff;
+    outline: none;
+    box-shadow: 0 2px 6px rgba(0,0,0,.06);
+  }
+  .day-task-input:focus {
+    border-color: #0034c4;
+    box-shadow: 0 0 0 3px rgba(0,52,196,.1);
+  }

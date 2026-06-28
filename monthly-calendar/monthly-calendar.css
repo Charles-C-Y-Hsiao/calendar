@@ -1,0 +1,307 @@
+  .overall_calendars{
+    position: relative;
+    width: fit-content;
+  }
+  #calendars {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+    /* border: 2px solid #131313; */
+    box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.2);
+    width: fit-content;
+  }
+
+  .calendar {
+    display: flex;
+    align-items: center;
+    /* justify-content: center; */
+    flex-direction: column;
+    border-radius: 10px;
+  }
+  .calendar-body {
+    display: grid;
+    /* 第1列: 月份標題、自動高; 第2列: 週標題; 其下由 dates 自己決定行數 */
+    grid-template-rows: auto auto;
+    gap: var(--gap);
+    padding: 6px;
+    border-radius: 15px;
+    /* border: 1px solid red; */
+  }
+  .calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    position: relative;
+  }
+  /* 週曆連結靠左 */
+  .week-link {
+    position: absolute;
+    left: 0;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    padding: 4px 8px;
+    cursor: pointer;
+    color: #333;
+    text-decoration: none;
+  }
+  .week-link .btn-word {
+    font-size: 15px;
+    font-weight: 900;
+    margin-left: 5px;
+    user-select: none;
+    font-family: "calibri", sans-serif;
+  }
+
+  .week-link:hover {
+    color: #4f46e5; /* hover 效果（可調整） */
+  }
+
+  .user_name_popup {
+    position: absolute;
+    right: 8px;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    padding: 4px 8px;
+    cursor: pointer;
+    color: #333;
+    text-decoration: none;
+  }
+  .user_name_popup .btn-word {
+    font-size: 15px;
+    font-weight: 900;
+    margin-right: 5px;
+    user-select: none;
+    font-family: "calibri", sans-serif;
+  }
+  .user_name_popup:hover {
+    color: #4f46e5; /* hover 效果（可調整） */
+  }
+
+  /* 讓這個元素橫跨整個 grid（從第 1 條線延伸到最後一條線）*/
+  .month-header{
+    grid-column: 1 / -1;
+    text-align: center;
+    font-weight: 600;
+    padding: 6px 0;
+  }
+
+  .calendar-body ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .calendar-body ul[class^="dates-"] {
+    padding-inline: 10px;
+    box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.2);
+  }
+
+  .calendar-body ul li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    font-size: 17px;
+    color: #414141;
+  }
+
+  .color{
+    color:#ebf5fb; /* Less */
+    color:#5dade2;
+    color:#2e86c1;
+    /* color:#1b4f72;  */
+    color:#0060fd; /* More */
+  }
+
+  /* 週標題橫向 7 欄 */
+  .weeks{
+    display: grid;
+    grid-template-columns: repeat(7, var(--colW));
+    gap: var(--gap);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  [class|="dates"] li,
+  .weeks li{
+    padding: 0;
+    margin: 0;
+    z-index: 1;
+    cursor: pointer;
+    text-align: center;
+    font-weight: 500;
+  }
+  .month {
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    font-size: 11px;
+    font-weight: 600;
+    width: 100%;
+    height: 20px;
+    padding-right: 10px;
+    border-bottom: 2px solid #f8f9f9;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    user-select: none;
+  }
+  .day,
+  .year {
+    font-size: 16px;
+    margin: 2px 0;
+    color: #999;
+  }
+  .date {
+    font-size: 39px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .dates, [class^="dates-"]{
+    display: grid;
+    grid-template-columns: repeat(7, var(--colW));
+    /* --rowH: 180px; */
+    grid-auto-rows: var(--rowH);
+    gap: var(--gap);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  [class|="dates"] li.mon
+  {
+    font-weight: 700;
+  }
+  .weeks li {
+    font-weight: 700;
+  }
+
+  [class|="dates"] li::before    
+  {
+    position: absolute;
+    content: "";
+    display: block;
+    width: 100%;
+    height: 100%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 15px;
+    z-index: -1;
+    border: 2px solid #f8f9f9;
+    box-sizing: border-box;
+    background: #fff;
+  }
+
+  [class|="dates"] li.inactive::before
+  {
+    background: #f8f9f9;
+    border: 2px solid #f8f9f9;
+    box-sizing: border-box;
+  }
+
+  [class|="dates"] li.mon::before
+  {
+    border: none;
+    background: none;
+  }
+
+  [class|="dates"] li.active
+  {
+    color: #aaa;
+  }
+
+  .dates li.today .month {
+    background: #0034c4;
+    color: #fff;
+    border-bottom: none;
+  }
+
+  [class|="dates"] li.inactive {
+    color: #aaa;
+  }
+
+  .dates li.today::before {
+    border: 2px solid #0034c4;
+  }
+
+  .color_container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    position: absolute;
+    right: 0;
+    bottom: -30px;
+  }
+  .box {
+    width: 15px;
+    height: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  .less,
+  .more {
+    font-size: 18px;
+    font-weight: bold;
+  }
+  /* 為 li 加上 data-tooltip 後，設定相對定位 */
+  /* li[data-tooltip] {
+    position: relative;
+    list-style: none;
+    cursor: pointer;
+  }
+
+  li[data-tooltip]:hover {
+    z-index: 100;
+  } */
+
+  /* 預設狀態下隱藏 tooltip */
+  /* li[data-tooltip]::after {
+    content: "";
+    position: absolute;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s;
+  } */
+
+  /* 當滑鼠移到 li 上時，使用 ::after 顯示 tooltip */
+  /* 設定動畫：在 0.5 秒後開始，2 秒內淡出
+  animation: tooltipFadeOut 2s 0.5s forwards; */
+  /* li[data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    top: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #000;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 5px;
+    white-space: nowrap;
+    z-index: 100;
+    opacity: 1;
+    visibility: visible;
+    animation: tooltipFadeOut 2s 0.5s forwards;
+  }
+
+  @keyframes tooltipFadeOut {
+    from  { opacity: 1; visibility: visible; }
+    to    { opacity: 0; visibility: hidden; }
+  } */
+
+  .btn-dir {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    border-radius: 50%;
+    /* background: #fff; */
+    border: none;
+    outline: none;
+    cursor: pointer;
+  }

@@ -1,0 +1,234 @@
+    .bulk-schedule-btn {
+        border: 0;
+        background: transparent;
+        color: #333;
+        cursor: pointer;
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        font-size: 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+    }
+    .bulk-schedule-btn:hover {
+        color: #4f46e5;
+        background: rgba(79, 70, 229, .08);
+    }
+    .bulk-schedule-btn .fi {
+        display: inline-flex;
+        line-height: 1;
+    }
+    .repeat-badge {
+        border: 0;
+        background: transparent;
+        color: #1d4ed8;
+        cursor: pointer;
+        border-radius: 6px;
+        padding: 2px;
+        display: inline-flex;
+        align-items: center;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1;
+        white-space: nowrap;
+    }
+    .repeat-badge:hover {
+        background: rgba(37, 99, 235, .12);
+    }
+    .repeat-badge[hidden] {
+        display: none;
+    }
+    .repeat-badge .fi {
+        display: inline-flex;
+        font-size: 13px;
+        line-height: 1;
+    }
+    .bulk-dialog-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(17, 24, 39, .32);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+    }
+    .bulk-dialog {
+        width: min(760px, calc(100vw - 32px));
+        max-height: min(720px, calc(100vh - 32px));
+        overflow: auto;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 18px 48px rgba(15, 23, 42, .26);
+        padding: 16px;
+    }
+    .bulk-dialog-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+    .bulk-dialog-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #111827;
+    }
+    .bulk-close {
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        font-size: 22px;
+        color: #4b5563;
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+    }
+    .bulk-close:hover {
+        background: #f3f4f6;
+    }
+    .bulk-form-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+    }
+    .bulk-field {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .bulk-field.bulk-wide {
+        grid-column: span 2;
+    }
+    .bulk-field label,
+    .bulk-section-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #374151;
+    }
+    .bulk-field input,
+    .bulk-field select {
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 7px 9px;
+        font-size: 14px;
+        min-height: 34px;
+    }
+    .bulk-mode-row,
+    .bulk-action-row {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+    }
+    .bulk-mode-row label {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #1f2937;
+    }
+    .bulk-choice-panel {
+        margin-top: 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 10px;
+        background: #fbfbfe;
+    }
+    .bulk-day-grid {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 6px;
+        margin-top: 8px;
+    }
+    .bulk-day-grid.month-days {
+        grid-template-columns: repeat(8, minmax(0, 1fr));
+    }
+    .bulk-day-grid label {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        min-height: 30px;
+        border: 1px solid #dbe1ee;
+        background: #fff;
+        border-radius: 8px;
+        font-size: 13px;
+        cursor: pointer;
+        user-select: none;
+    }
+    .bulk-day-grid label.is-disabled {
+        color: #9ca3af;
+        background: #f3f4f6;
+        cursor: not-allowed;
+        opacity: .64;
+    }
+    .bulk-day-grid input {
+        width: 13px;
+        height: 13px;
+    }
+    .bulk-primary,
+    .bulk-secondary,
+    .bulk-danger {
+        border: 0;
+        border-radius: 8px;
+        cursor: pointer;
+        padding: 8px 12px;
+        font-size: 14px;
+        font-weight: 700;
+    }
+    .bulk-primary {
+        background: #2563eb;
+        color: #fff;
+    }
+    .bulk-secondary {
+        background: #e5e7eb;
+        color: #1f2937;
+    }
+    .bulk-danger {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+    .bulk-message {
+        min-height: 18px;
+        margin-top: 8px;
+        color: #374151;
+        font-size: 13px;
+        font-weight: 700;
+    }
+    .bulk-message.error {
+        color: #dc2626;
+    }
+    .bulk-group-list {
+        margin-top: 14px;
+        border-top: 1px solid #e5e7eb;
+        padding-top: 12px;
+    }
+    .bulk-group-card {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 10px;
+        align-items: center;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 8px 10px;
+        margin-top: 8px;
+        background: #fff;
+    }
+    .bulk-group-title {
+        font-weight: 700;
+        color: #111827;
+        overflow-wrap: anywhere;
+    }
+    .bulk-group-meta {
+        font-size: 12px;
+        color: #6b7280;
+        margin-top: 2px;
+    }
+    .bulk-group-actions {
+        display: flex;
+        gap: 6px;
+    }

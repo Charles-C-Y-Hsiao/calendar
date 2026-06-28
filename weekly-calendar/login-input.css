@@ -1,0 +1,204 @@
+  .user-dialog-overlay {
+    display: none;       /* 初始隱藏 */
+    position: fixed;
+    inset: 0;            /* top:0; right:0; bottom:0; left:0 */
+    background: rgba(0,0,0,0.25);
+    backdrop-filter: blur(2px); /* 可選：背景模糊 */
+    z-index: 5;         /* 在最上層，但低於 dialog */
+  }
+  .user-dialog{
+    /* display: flex; */
+    display: none;
+    flex-direction: column;
+    justify-content: flex-start;    
+    /* align-items: center; */
+    width: fit-content;
+    /* margin: 50px 0 0 50px; */
+    position: fixed; /* 不受 body/grid 影響 */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 10px;
+    z-index: 8; /* 蓋在遮罩之上 */
+  }
+  .user-dialog .input-box {
+    position: relative;
+    margin: 7px 0;
+  }
+
+  #textInput {
+    width: 365px;
+    height: 45px;
+    padding: 0 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;    
+    font-size: 16px;
+    filter: drop-shadow(0 1px 0 #efefef)
+    drop-shadow(0 1px 0.5px rgba(239, 239, 239, 0.5));
+    transition: all 0.3s cubic-bezier(0.15, 0.83, 0.66, 1);    
+  }
+
+  #textInput:focus {
+    border-color: transparent;
+    box-shadow: 0 0 0 1px #2b2b2f;
+  }
+
+  .input-box .hint-wording {
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
+    font-size: 1em;
+    /* color: #1f293a; */
+    color: #c8c8c8;
+    pointer-events: none;
+    /* border: 1px solid #999; */
+    border-radius: 6px;
+    transition: 0.5s ease;
+  }
+  .input-box #textInput:focus ~ .hint-wording, 
+  .input-box #textInput:valid ~ .hint-wording {
+    top: 1px;
+    font-size: 0.8em;
+    /* background-color: #1f293a; */
+    background-color: #fff;
+
+    padding: 0 6px;
+    color: #1f293a;
+  }
+
+  /* 父層：裡面有 invalid 的 input 時，畫出 ❗ */
+  .input-box:has(#textInput:invalid)::after {
+    content: "\f007";              /* <-- 放 icon 的 unicode */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 400;
+    position: absolute;
+    right: 22px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #e63946;
+    z-index: 1;
+  }
+  /* 小叉叉 icon（當角標 badge） */
+  .input-box:has(#textInput:invalid)::before {
+    content: "\f00d"; /* xmark → Unicode 為 f00d */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900; /* solid，因為 xmark regular 是 Pro 才有 */
+    
+    position: absolute;
+    right: 19px;   /* 調整水平位置，套在 user icon 右上 */
+    top: 45%;      /* 調整垂直位置 */
+    transform: translate(50%, -50%);
+    
+    font-size: 10px; /* 角標變小 */
+    color: #e63946;  /* 紅色 */
+    background: #e63946;
+    
+    background: #fff;   /* 加白底避免重疊 */
+    border-radius: 50%;
+    padding: 1px;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .input-box:has(#textInput:valid)::after {
+    content: "\f007";              /* <-- 放 icon 的 unicode */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 400;
+    position: absolute;
+    right: 22px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #0a7;
+    z-index: 1;
+  }
+  .input-box:has(#textInput:valid)::before {
+    content: "Enter your 8-digit ID";
+    position: absolute;
+    right: 39px;
+    top: 50%;
+    transform: translateY(-50%);
+
+    background: #f2f2f2;
+    color: #0a7;
+    padding: 3px 4px;
+    font-size: 14px;
+    border-radius: 5px;
+    white-space: nowrap;
+    z-index: 2;
+  }
+
+  #textInput.warning {
+    border-color: #b02a37;
+    box-shadow: 0 0 0 .25rem rgba(220, 53, 69, 0.25);
+    
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(.375em + .1875rem) center;
+    background-size: calc(.75em + .375rem) calc(.75em + .375rem);
+  }
+
+  #warningText {
+    color: red;
+    font-size: 14px;
+    display: none;
+    margin-top: 5px;
+    font-weight: 600;
+  }
+
+  @keyframes warning-shake {
+    0%   { transform: translateX(0); }
+    20%  { transform: translateX(-3px); }
+    40%  { transform: translateX(3px); }
+    60%  { transform: translateX(-2px); }
+    80%  { transform: translateX(2px); }
+    100% { transform: translateX(0); }
+  }
+
+  #warningText.shake-warning {
+    animation: warning-shake 0.35s ease;
+  }
+
+  #counter {
+    font-size: 14px;
+    margin-top: 5px;
+    color: #555;
+  }
+
+  /* 起始：0 或很低 → 黃色 */
+  #counter.counter-yellow {
+    color: #e6b800;   /* 黃色 */
+  }
+
+  /* 中段：慢慢接近 8 → 綠色 */
+  #counter.counter-green {
+    color: #0a7;      /* 綠色（你原本 valid 用的色系） */
+  }
+  #counter.weight {
+    font-weight: 600;
+  }
+
+  /* 超過 8 → 紅色 */
+  #counter.counter-red {
+    color: #e63946;   /* 紅色 */
+  }
+
+  #dialog-close{
+    width: 100%;
+    display: flex;
+    align-content: center;
+    justify-content: flex-end;
+    text-align: center;
+    height: 20px;
+    font-size: 25px;
+    color: #5f5d6b;
+  }
+  #dialog-close-btn {
+    display: grid;
+    align-items: center;
+    border-radius: 50%;
+  }
+  #dialog-close-btn:hover{
+    color: #fff;
+    background: #c43274;
+  }

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>一週作息表（拖曳建立區塊）</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Font Awesome（可選：刪除按鈕圖示用） -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"/>
+
+  <!-- interact.js -->
+  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+
+  <!-- dayjs（時間格式化） -->
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+
+  <link rel="stylesheet" href="week-schedule.css" />
+  <link rel="stylesheet" href="open-dialog.css" />
+
+  <style>
+    :root{
+      --hourHeight: 64px;    /* 每小時高度 */
+      --slot: 30;            /* 每格幾分鐘：30 = 半小時 */
+      --slotHeight: calc(var(--hourHeight) * var(--slot) / 60); /* 每格像素 */
+      --days: 7;
+      --dayWidth: 140px;     /* 每天欄寬 */
+      --headerH: 42px;       /* 天標題高度 */
+      --rulerW: 70px;        /* 左側時間尺寬 */
+      --gap: 1px;
+      --bg: #fff;
+      --line: #e7e7ea;
+      --accent: #4f46e5;
+      --block: #eef2ff;
+      --block-border: #c7d2fe;
+      --block-text: #111827;
+      --gray-deep:  #c7d2fe;  /* 深灰，最明顯的分隔線或字色 */
+      --gray-mid:   #d9dbe9;  /* 中灰，hover 或背景 */
+      --gray-light: #ececf3;  /* 淺灰，主要背景 */
+      --gray-soft:  #f5f5f8;  /* 最淡灰，比 #fafafa 更有存在感 */
+    }
+
+    * { 
+      box-sizing: border-box; 
+      font-family: "calibri", sans-serif;
+      /* font-family: ui-sans-serif, system-ui, "Segoe UI", 'PingFang TC', 'Microsoft JhengHei', Arial;  */
+    }
+    body {
+      margin: 0; background: #f6f7fb; color: #222;
+      display: grid; place-items: start center; 
+      padding: 24px;
+      height: 100vh;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="board">
+    <div class="weekbar">
+      <button class="btn-dir left"  id="btnPrevWeek" title="上一週"></button>
+      <span class="range" id="weekRange"></span>
+      <button class="btn-dir right" id="btnNextWeek" title="下一週"></button>
+    </div>
+
+    <div class="topbar" id="topbar">
+      <div class="cell ruler">時間</div>
+      <!-- 7 天標題會由 JS 動態建立 -->
+    </div>
+
+    <div class="content" id="content">
+      <div class="ruler" id="ruler"></div>
+      <!-- 7 天欄位會由 JS 動態建立 -->
+    </div>
+  </div>
+  <script src="setupElements.js"></script>
+  <script src="TopbarRulerAndDays.js"></script>
+  <script src="CreateGhostOrBlock.js"></script>
+  <script src="interact-drag-resize.js"></script>
+  <script src="PreAndNextWeek.js"></script>
+  <script>
+    /* ===================== 🔧 後端 API 基本設定 ===================== */
+    const API_BASE = ''; // 同網域即可，如不同網域請填完整網址
+    function fmtDate(d) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth()+1).padStart(2,'0');
+      const day = String(d.getDate()).padStart(2,'0');
+      return `${y}-${m}-${day}`;
+    }
+    
+    /* ===================== 🔧 時間 ↔ px 轉換 ===================== */
+    function hhmmToMinutes(hhmm) {
+      const [h,m] = hhmm.split(':').map(Number);
+      return h*60 + m;
+    }
+
+    function minutesToHhmm(min) {
+      const h = Math.floor(min/60), m = min%60;
+      return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+    }
+
+    function topHeightFromTimes(startHHmm, endHHmm) {
+      const startMin = hhmmToMinutes(startHHmm);
+      const endMin   = hhmmToMinutes(endHHmm);
+      const base = DAY_START_HOUR*60;
+
+      const topMin = Math.max(0, startMin - base);
+      const durMin = Math.max(SLOT_MINUTES, endMin - startMin);
+
+      const topPx = (topMin / SLOT_MINUTES) * slotPx;
+      const hPx   = (durMin / SLOT_MINUTES) * slotPx;
+      return { topPx, hPx };
+    }
+
+    function timesFromTopHeight(topPx, heightPx) {
+      const base = DAY_START_HOUR*60;
+      const startMinFromBase = Math.round(topPx / slotPx) * SLOT_MINUTES;
+      const durMin           = Math.round(heightPx / slotPx) * SLOT_MINUTES;
+
+      const startAbs = base + startMinFromBase;
+      const endAbs   = Math.min(DAY_END_HOUR*60, startAbs + durMin);
+
+      return { startHHmm: minutesToHhmm(startAbs), endHHmm: minutesToHhmm(endAbs) };
+    }
+
+    /* ===================== 🔧 序列化 / 反序列化 ===================== */
+    // 把某一天（dayIndex）DOM 的 blocks 轉成 [{id,start_time,end_time,text}]
+    function serializeDay(dayIndex) {
+      const dayEl = dayCols[dayIndex];
+      const blocks = Array.from(dayEl.querySelectorAll('.block'));
+      return blocks.map(b => {
+        const id = b.dataset.id;
+        const top = parseFloat(b.style.top) || 0;
+        const h   = parseFloat(b.style.height) || slotPx;
+
+        const { startHHmm, endHHmm } = timesFromTopHeight(top, h);
+        const text = (b.querySelector('.text')?.innerText || '').trim();
+        return { id, start_time: startHHmm, end_time: endHHmm, text };
+      });
+    }
+    
+    // 從後端的「單日陣列」反序列化成 DOM blocks
+    function renderDayFromData(dayIndex, items, setupInteract) {
+      const dayEl = dayCols[dayIndex];
+      // 清空這天既有 block（保留 dayEl）
+      dayEl.querySelectorAll('.block').forEach(n => n.remove());
+
+      for (const itm of items) {
+        const { topPx, hPx } = topHeightFromTimes(itm.start_time, itm.end_time);
+        const block = createBlockElement({
+          top: topPx,
+          height: hPx,
+          dayIndex,
+          id: itm.id,          // ✅ 保留原有 id
+          text: itm.text || ''
+        });
+        dayEl.appendChild(block);
+        setupInteract(block);
+        updateBlockTime(block);
+      }
+    }
+
+    //weekDates(startDate) 會回傳 7 個日期字串的陣列
+    function weekDates(startDate) {
+      return Array.from({length:7}, (_,i)=>fmtDate(addDays(startDate,i)));
+    }
+
+    let allSchedules = {};   // 完整 map：{ '2025-11-14': [ ... ], ... }
+
+    // 用「完整 map」重畫目前這一週
+    function renderWeekFromMap(startDate, setupInteract, dataMap) {
+      // 1) 先清空 7 天既有 blocks
+      dayCols.forEach(el => el.querySelectorAll('.block').forEach(n => n.remove()));
+
+      // 2) 依照 startDate 這一週的七天重新渲染
+      weekDates(startDate).forEach((dStr, i) => {
+        // const items = Array.isArray(data[dStr]) ? data[dStr] : []; //原版本沒有check
+
+        const rawArr = Array.isArray(dataMap[dStr]) ? dataMap[dStr] : [];
+
+        const items = [];
+        const badItems = [];
+
+        rawArr.forEach(obj => {
+          const hasStart = Object.prototype.hasOwnProperty.call(obj, 'start_time');
+          const hasEnd   = Object.prototype.hasOwnProperty.call(obj, 'end_time');
+
+          if (hasStart && hasEnd) {
+            items.push(obj);
+          } else {
+            badItems.push(obj);
+          }
+        });
+
+        if (badItems.length > 0) {
+          console.warn(`[renderWeekFromMap] 日期 ${dStr} 有資料缺少 start_time 或 end_time：`, badItems);
+        }
+        renderDayFromData(i, items, setupInteract);
+      });
+    }
+
+    // 載入一週資料並渲染
+    async function loadWeek(startDate, setupInteract) {
+      const from = fmtDate(startDate);
+      const to   = fmtDate(addDays(startDate, 6));
+      try {
+        const res = await fetch(`${API_BASE}/schedule?from=${from}&to=${to}`);
+        const data = await res.json(); // 形如 { '2025-10-06': [ ... ], ... }
+        // console.log(data)
+
+        // 把這一週的 subset 合併進全域 allSchedules
+        allSchedules = {
+          ...allSchedules,
+          ...data
+        };
+        // 利用完整 map 重畫這一週
+        renderWeekFromMap(startDate, setupInteract, allSchedules);
+      } catch (e) {
+        console.error('loadWeek error:', e); // 失敗時就是空週        
+      }
+    }
+
+    function addDays(date, n){ const d = new Date(date); d.setDate(d.getDate()+n); return d; }
+    
+    function fmtDate(d){
+      const y = d.getFullYear();
+      const m = String(d.getMonth()+1).padStart(2,'0');
+      const day = String(d.getDate()).padStart(2,'0');
+      return `${y}-${m}-${day}`;
+    }
+
+    /* 產生 ID */
+    function uid() { return 't' + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+    // ===== 建立 block 元素 =====
+    let uidCounter = 0;
+    function createBlockElement({ top, height, dayIndex, id = null, text = ''  }) {
+      const block = document.createElement('div');
+      block.className = 'block';
+      // block.dataset.id = `blk_${++uidCounter}`;
+      block.dataset.id = uid();
+      block.dataset.dayIndex = String(dayIndex);
+      // block.style.top = `${Math.round(top)}px`;
+      // block.style.height = `${Math.round(height)}px`;
+      block.style.top    = px(top);
+      block.style.height = px(Math.max(slotPx, height));
+      block.setAttribute('data-resizeable', 'true');
+
+      block.innerHTML = `
+        <div class="meta">
+          <span class="time">--:-- ~ --:--</span>
+          <span class="actions">
+            <button class="btn-delete" title="刪除">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </span>
+        </div>
+        <div class="text" contenteditable="true"></div>
+        <div class="handle top"></div>
+        <div class="handle bottom"></div>
+      `;
+      // // 刪除按鈕
+      // block.querySelector('.btn-delete').addEventListener('click', () => block.remove());
+
+      const txt = block.querySelector('.text');
+      txt.textContent = text;
+
+      // 刪除：刪完立刻儲存當日
+      block.querySelector('.btn-delete').addEventListener('click', () => {
+        const dIdx = Number(block.dataset.dayIndex);
+        block.remove();
+        persistDay(dIdx);
+      });
+
+      // 文字輸入：debounce 後儲存
+      const debouncedSave = debounce(() => {
+        const dIdx = Number(block.dataset.dayIndex);
+        persistDay(dIdx);
+      }, 500);
+      txt.addEventListener('input', debouncedSave);
+
+      attachTimeEditor(block);
+
+      return block;
+    }
+
+    // ===== 計算顯示時間（依欄內 top/height -> HH:mm ~ HH:mm） =====
+    function updateBlockTime(block) {
+      const top = parseFloat(block.style.top);
+      const height = parseFloat(block.style.height);
+
+      const minutesFromStart = Math.round(top / slotPx) * SLOT_MINUTES;
+      const minutesDuration  = Math.round(height / slotPx) * SLOT_MINUTES;
+
+      const startMin = DAY_START_HOUR * 60 + minutesFromStart;
+      const endMin   = Math.min(DAY_END_HOUR * 60, startMin + minutesDuration);
+
+      const sH = Math.floor(startMin / 60), sM = startMin % 60;
+      const eH = Math.floor(endMin   / 60), eM = endMin   % 60;
+
+      const timeStr = `${pad2(sH)}:${pad2(sM)} ~ ${pad2(eH)}:${pad2(eM)}`;
+      block.querySelector('.time').textContent = timeStr;
+    }
+
+    /* ===================== 啟動流程 ===================== */
+    // Demo 使用
+    // function addBlock(setupInteract, { top, height, dayIndex }) {
+    //   const block = createBlockElement({ top, height, dayIndex });
+    //   dayCols[dayIndex].appendChild(block);
+    //   setupInteract(block);
+    //   updateBlockTime(block);
+    //   return block;
+    // }
+    
+    // --- 週一為一週起點（想改週日就把 1 改 0）---
+    const WEEK_STARTS_ON = 1; // 1=Mon, 0=Sun
+
+    // 工具：日期處理
+    function startOfWeek(date, weekStartsOn = WEEK_STARTS_ON){
+      const d = new Date(date);
+      const day = d.getDay();
+      const diff = (day - weekStartsOn + 7) % 7; // 往回推到週起點
+      d.setDate(d.getDate() - diff);
+      d.setHours(0,0,0,0);
+      return d;
+    }
+
+    // 你想要「2025-11-02 這天是本週的 SUN」當示範可這樣起始：
+    // const currentRefDate = new Date('2025-11-02');
+    const currentRefDate = new Date(); // 也可改成今天
+    let viewStart = startOfWeek(currentRefDate, WEEK_STARTS_ON); // 本週起始（週一）
+
+    function updateWeekRangeLabel(){
+      const rangeEl = document.getElementById('weekRange');
+      const from = fmtDate(viewStart);
+      const to   = fmtDate(addDays(viewStart, 6));
+      rangeEl.textContent = `${from} — ${to}`;
+    }
+
+    function connectCalendarWS(setupInteract) {
+      const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+      const wsUrl = `${proto}://${location.host}`;   // 例如 ws://localhost:3010
+      const ws    = new WebSocket(wsUrl);
+
+      ws.addEventListener('open', () => {
+        console.log('[WS] connected (week view)');
+      });
+
+      ws.addEventListener('message', (ev) => {
+        let msg;
+        try {
+          msg = JSON.parse(ev.data);
+        } catch (e) {
+          console.warn('[WS] parse error', e);
+          return;
+        }
+
+        if (msg.type === 'calendar-init') {
+          console.log('trigger calendar-init')
+          // 一連上就拿到完整 map
+          allSchedules = msg.payload || {};
+          renderWeekFromMap(viewStart, setupInteract, allSchedules);
+        } else if (msg.type === 'calendar-updated') {
+          console.log('trigger calendar-updated')
+          // 任一程式（周曆/其他）更新檔案後，這裡會收到最新完整 map
+          allSchedules = msg.payload || {};
+          renderWeekFromMap(viewStart, setupInteract, allSchedules);
+        }
+      });
+
+      ws.addEventListener('close', () => {
+        console.log('[WS] disconnected, retry in 3s...');
+        setTimeout(connectCalendarWS, 3000);
+      });
+
+      ws.addEventListener('error', (e) => {
+        console.error('[WS] error', e);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 導覽按鈕 SVG
+      document.getElementById('btnPrevWeek').innerHTML = left_SVG;
+      document.getElementById('btnNextWeek').innerHTML = right_SVG;
+      
+      initTopbarRulerAndDays(viewStart); // ① 產生 topbar / ruler / dayCols（依目前 viewStart）
+
+      // ② 讓 block 具備 drag / resize
+      const setupInteract = initInteractForBlocks({ slotPx, stepY, stepX, dayCols });
+      initCreateGhostOrBlock(setupInteract); // ③ day 內拖拉建立 ghost / block
+      // ✅ 初始載入當週
+      await loadWeek(viewStart, setupInteract);
+      // 2) 再開 WS，之後都靠 WS 來即時同步
+      connectCalendarWS(setupInteract);
+
+      updateWeekRangeLabel();
+      // 🔽 加在這裡
+      bindKeyboardControls();
+      // // demo block
+      // addBlock(setupInteract, { top: slotPx * 6, height: slotPx * 3, dayIndex: 1 });
+
+      // ③ 左右切週
+      document.getElementById('btnPrevWeek').addEventListener('click', async () => {
+        viewStart = addDays(viewStart, -7);
+        initTopbarRulerAndDays(viewStart);
+        // 重新掛上 interact 行為（新的 dayCols）
+        const _setup = initInteractForBlocks({ slotPx, stepY, stepX, dayCols });
+        initCreateGhostOrBlock(_setup);
+        await loadWeek(viewStart, _setup);
+        updateWeekRangeLabel();
+      });
+      document.getElementById('btnNextWeek').addEventListener('click', async () => {
+        viewStart = addDays(viewStart, +7);
+        initTopbarRulerAndDays(viewStart);
+        const _setup = initInteractForBlocks({ slotPx, stepY, stepX, dayCols });
+        initCreateGhostOrBlock(_setup);
+        await loadWeek(viewStart, _setup);
+        updateWeekRangeLabel();
+      });
+    });
+
+    /* ===================== 🔧 小工具：debounce ===================== */
+    function debounce(fn, wait=300) {
+      let t = null;
+      return (...args) => {clearTimeout(t); t = setTimeout(() => fn(...args), wait);
+      };
+    }
+  </script>
+</body>
+</html>

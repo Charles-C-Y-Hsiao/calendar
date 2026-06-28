@@ -1,0 +1,231 @@
+
+    /* === btn-basic END === */
+    .btn {
+        width: fit-content;
+        display: inline-block;
+        font-weight: 600;
+        line-height: 1.5;
+        color: #212529;
+        text-align: center;
+        text-decoration: none;
+        vertical-align: middle;
+        cursor: pointer;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+        background-color: transparent;
+        border: 1px solid transparent;
+        padding: .375rem .75rem;
+        font-size: 1rem;
+        border-radius: .25rem;
+        transition: 
+            color .15s ease-in-out,
+            background-color .15s ease-in-out,
+            border-color .15s ease-in-out,
+            box-shadow .15s ease-in-out;
+    }
+    .btn:hover {
+        color: #212529;
+    }
+    .btn:focus {
+        outline: none;
+    }
+    /* === btn-basic START === */
+    /* === btn-primary START === */
+    .btn-primary {
+        color: #fff;
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+    .btn-primary:hover {
+        color: #fff;
+        background-color: #0b5ed7;
+        border-color: #0a58ca;
+    }
+    .btn-check:focus+.btn-primary, .btn-primary:focus {
+        color: #fff;
+        background-color: #0b5ed7;
+        border-color: #0a58ca;
+        box-shadow: 0 0 0 .25rem rgba(49,132,253,.5);
+    }
+    /* === btn-primary END === */
+
+    /* === btn-light START === */
+    .btn-light {
+        color: #000;
+        background-color: #f8f9fa;
+        border-color: #f8f9fa;
+    }
+    .btn-light:hover {
+        color: #000;
+        background-color: #f9fafb;
+        border-color: #f9fafb;
+    }
+    .btn-check:active+.btn-light, 
+    .btn-check:checked+.btn-light, 
+    .btn-light.active {
+        color: #000;
+        background-color: #f9fafb;
+        border-color: #f9fafb;
+    }
+    .btn-check:focus+.btn-light, .btn-light:focus {
+        color: #000;
+        background-color: #f9fafb;
+        border-color: #f9fafb;
+        box-shadow: 0 0 0 .25rem rgba(211,212,213,.5);
+    }
+    /* === btn-light END === */
+
+    /* === btn-warning START === */
+    .btn-warning {
+        color: #000;
+        background-color: #ffc107;
+        border-color: #ffc107;
+    }
+    .btn-warning:hover {
+        color: #000;
+        background-color: #ffca2c;
+        border-color: #ffc720;
+    }
+    .btn-check:focus + .btn-warning,.btn-warning:focus {
+    border-color: #ffc720;
+    box-shadow: 0 0 0 0.25rem rgba(217, 164, 6, .5);
+    }
+    /* === btn-warning END === */
+
+    /* === btn-secondary START === */
+    .btn-secondary {
+        color: #fff;
+        background-color: #6c757d;
+        border-color: #6c757d;
+    }
+    .btn-secondary:hover {
+        color: #fff;
+        background-color: #5c636a;
+        border-color: #565e64;
+    }
+    .btn-check:focus+.btn-secondary, .btn-secondary:focus {
+        color: #fff;
+        background-color: #5c636a;
+        border-color: #565e64;
+        box-shadow: 0 0 0 .25rem rgba(130,138,145,.5);
+    }
+    /* === btn-secondary END === */
+
+    /* === btn-danger START === */
+    .btn-danger {
+        color: #fff;
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+    .btn-danger:hover {
+        color: #fff;
+        background-color: #bb2d3b;
+        border-color: #b02a37;
+    }
+    .btn-check:active+.btn-danger,
+    .btn-check:checked+.btn-danger,
+    .btn-danger.active{
+        color: #fff;
+        background-color: #b02a37;
+        border-color: #a52834;
+    }
+    .btn-check:focus+.btn-danger,.btn-danger:focus {
+        /* color: #fff;
+        background-color: #bb2d3b; */
+        border-color: #b02a37;
+        box-shadow: 0 0 0 .25rem rgba(225,83,97,.5);
+    }
+    /* === btn-danger END === */
+
+    /* === btn-success START === */
+    .btn-success {
+        color: #fff;
+        background-color: #198754;   /* 主綠（正常） */
+        border-color: #198754;
+    }
+    .btn-success:hover {
+        color: #fff;
+        background-color: #157347;   /* hover 綠（較深） */
+        border-color: #146c43;       /* hover border 綠（不同色階） */
+    }
+
+    .btn-check:active + .btn-success,
+    .btn-check:checked + .btn-success,
+    .btn-success.active {
+        color: #fff;
+        background-color: #146c43;   /* active 更深的綠 */
+        border-color: #13653f;
+    }
+
+    .btn-check:focus + .btn-success,
+    .btn-success:focus {
+        border-color: #146c43;
+        box-shadow: 0 0 0 .25rem rgba(60, 153, 110, .5); /* 綠色光暈 */
+    }
+    /* === btn-success END === */
+
+    /* === btn-bright-green START === */
+    .btn-bright-green {
+        color: #fff;
+        background-color: #0b8c4c;   /* 主亮綠 */
+        border-color: #0b8c4c;
+    }
+    .btn-bright-green:hover {
+        color: #fff;
+        background-color: #0a7f45;   /* hover 稍微加深 */
+        border-color: #09763f;       /* hover border 再深一階 */
+    }
+
+    .btn-check:active + .btn-bright-green,
+    .btn-check:checked + .btn-bright-green,
+    .btn-bright-green.active {
+        color: #fff;
+        background-color: #09763f;   /* active 更深階亮綠 */
+        border-color: #086d3a;
+    }
+
+    .btn-check:focus + .btn-bright-green,
+    .btn-bright-green:focus {
+        border-color: #09763f;
+        box-shadow: 0 0 0 .25rem rgba(11, 140, 76, .45);  /* 亮綠光暈 */
+    }
+    /* === btn-bright-green END === */
+
+    /* === btn-pink START === */
+    .btn-pink {
+        color: #fff;
+        background-color: #e83e8c;  /* 主粉紅 */
+        border-color: #e83e8c;
+    }
+    .btn-pink:hover {
+        color: #fff;
+        background-color: #d73680;  /* hover 加深 */
+        border-color: #cd347a;      /* hover border 更深 */
+    }
+
+    .btn-check:active + .btn-pink,
+    .btn-check:checked + .btn-pink,
+    .btn-pink.active {
+        color: #fff;
+        background-color: #cd347a;  /* active 更深粉紅 */
+        border-color: #c43274;
+    }
+
+    .btn-check:focus + .btn-pink,
+    .btn-pink:focus {
+        border-color: #cd347a;
+        box-shadow: 0 0 0 .25rem rgba(222, 82, 146, .45);  /* 粉紅光暈 */
+    }
+    /* === btn-pink END === */
+    .btn-column {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        padding: 5px 8px 2px 8px;
+    }
+    .btn-small-wording {
+        font-size: 10px;
+        font-weight: 600;
+    }

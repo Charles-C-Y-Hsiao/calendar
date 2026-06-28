@@ -1,0 +1,411 @@
+    .board {
+        background: var(--bg);
+        border: 1px solid var(--gray-mid);
+        border-radius: 14px;
+        box-shadow: 0 10px 24px rgba(0,0,0,.05);
+        overflow: hidden;
+        height: 100%;
+        width: max-content;
+    }
+
+    /* 頂部標題列 */
+    .topbar {
+        display: grid;
+        grid-template-columns: var(--rulerW) repeat(var(--days), var(--dayWidth));
+        align-items: center;
+        height: var(--headerH);
+        border-bottom: 1px solid var(--gray-mid);
+        background: #fbfbfe;
+        position: sticky; top: 0; z-index: 5;
+        min-width: calc(var(--rulerW) + (var(--days) * var(--dayWidth)));
+    }
+    .topbar .cell {
+        padding: 0 8px;
+        font-weight: 600;
+        color: #374151;
+        font-size: 14px;
+        border-right: 1px solid var(--gray-mid);
+    }
+    .topbar .cell.ruler { color: #6b7280; font-weight: 500; }
+
+    /* 內容區：左時間尺 + 7 天欄位 */
+    .content {
+        display: grid;
+        grid-template-columns: var(--rulerW) repeat(var(--days), var(--dayWidth));
+        /* height: 70vh; */
+        overflow: auto;            /* 讓內容可捲動 */
+        position: relative;
+        min-width: calc(var(--rulerW) + (var(--days) * var(--dayWidth)));
+    }
+
+    /* 左側時間尺 */
+    .ruler {
+        position: relative;
+        background: #fcfcff;
+        border-right: 1px solid var(--gray-mid);
+    }
+    .ruler .hour {
+        height: var(--hourHeight);
+        border-bottom: 1px solid var(--gray-mid);
+        color: #6b7280;
+        font-size: 16px;
+        padding: 2px 6px;
+        display: flex;
+        align-items: flex-start;
+    }
+
+    /* 每日欄位 */
+    /* repeating-linear-gradient(
+        方向,
+        顏色1 起點位置,
+        顏色1 終點位置,
+        顏色2 終點位置,
+        顏色2 終點位置 + 一點偏移
+    ) */
+    .day {
+        position: relative;
+        border-right: 1px solid var(--gray-mid);
+        /* 背景用 repeating-linear-gradient 畫出 30 分鐘格線 */
+        background:
+        repeating-linear-gradient(
+            to bottom,
+            #ffffff 0 calc(var(--slotHeight) - 1px),
+            /* #fafafa calc(var(--slotHeight) - 1px) var(--slotHeight) */
+            var(--gray-mid) calc(var(--slotHeight) - 1px) var(--slotHeight)
+        );
+        /* repeating-linear-gradient(
+            to bottom,
+            blue 0 calc(var(--slotHeight) - 1px),
+            red  calc(var(--slotHeight) - 1px) var(--slotHeight)
+        ); */
+    }
+    .day::after {
+        /* 每小時較粗線 */
+        content: "";
+        position: absolute; inset: 0;
+        background:
+        repeating-linear-gradient(
+            to bottom,
+            transparent 0 calc(var(--hourHeight) - 1px),
+            /* #ececf3 calc(var(--hourHeight) - 1px) var(--hourHeight) */
+            var(--gray-light) calc(var(--hourHeight) - 1px) var(--hourHeight)
+        );
+        pointer-events: none;
+        z-index: 0;
+    }
+    .day:last-child { border-right: none; }
+
+    /* 建立中的半透明預覽 */
+    .ghost {
+        position: absolute;
+        left: 2px; right: 2px;
+        background: rgba(79,70,229,0.12);
+        border: 1px dashed var(--accent);
+        border-radius: 10px;
+        pointer-events: none;
+        z-index: 2;
+    }
+
+    /* 事件區塊 */
+    .block {
+        position: absolute;
+        left: 4px; right: 4px;
+        min-height: calc(var(--slotHeight)); /* 最小 1 格 */
+        border-radius: 12px;
+        border: 1px solid var(--block-border);
+        background: var(--block);
+        color: var(--block-text);
+        box-shadow: 0 6px 16px rgba(79,70,229,.12);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        z-index: 1;
+    }
+
+    .block.is-dragging,
+    .block.is-resizing {
+        z-index: 10;          /* 拖曳/縮放時確保蓋過相鄰欄位 */
+    }
+
+    .block.actions-open {
+        overflow: visible;
+        z-index: 20;
+    }
+
+    .block.is-completed {
+        background: #f3f4f6;
+        border-color: #d1d5db;
+        color: #6b7280;
+        box-shadow: 0 4px 12px rgba(107,114,128,.10);
+    }
+
+    .block.is-completed .meta {
+        background: #e5e7eb;
+        border-bottom-color: #d1d5db;
+    }
+
+    .block.is-completed .text {
+        opacity: .72;
+    }
+
+    .block .meta {
+        display: flex; align-items: center; justify-content: space-between;
+        /* gap: 5px; */
+        font-size: 12px; color: #374151;
+        background: rgba(99,102,241,.12);
+        padding: 4px 5px 4px 8px;
+        border-bottom: 1px solid var(--block-border);
+        user-select: none;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+        min-height: 28px;
+        min-width: 0;
+    }
+
+    .block .meta .block-complete-toggle {
+        border: 1px solid #cbd5e1;
+        background: #fff;
+        color: transparent;
+        cursor: pointer;
+        border-radius: 4px;
+        width: 14px;
+        height: 14px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+        font-size: 10px;
+    }
+
+    .block .meta .block-complete-toggle[aria-pressed="true"] {
+        border-color: #6b7280;
+        background: #6b7280;
+        color: #fff;
+    }
+
+    .block .meta .block-complete-toggle:hover {
+        border-color: #4f46e5;
+        color: #4f46e5;
+    }
+
+    .block .meta .block-complete-toggle[aria-pressed="true"]:hover {
+        color: #fff;
+    }
+
+    /* font-variant-numeric: tabular-nums;
+    讓所有數字等寬顯示，方便在表格或對齊時保持整齊 */
+    .block .meta .time {
+        font-variant-numeric: tabular-nums;
+        font-size: 15px;
+        line-height: 18px;
+        white-space: nowrap;
+        min-width: 0;
+        flex: 1 1 auto;
+        overflow: hidden;
+        text-overflow: clip;
+    }
+
+    .block .meta .actions {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        /* gap: 2px; */
+        gap: 2px;
+        flex: 0 0 auto;
+        white-space: nowrap;
+    }
+
+    .block .meta .actions button {
+        border: none; background: transparent; cursor: pointer;
+        color: #6b7280; padding: 2px; border-radius: 6px;
+        width: 16px;
+        height: 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .block .meta .block-complete-toggle i,
+    .block .meta .actions button i {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+    }
+    .block .meta .block-actions-toggle {
+        color: #4b5563;
+    }
+    .block .meta .block-actions-toggle:hover,
+    .block.actions-open .meta .block-actions-toggle {
+        background: rgba(79,70,229,.10);
+        color: #4f46e5;
+    }
+    .block .meta .block-action-menu {
+        position: absolute;
+        top: -4px;
+        left: calc(100% + 6px);
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+        padding: 3px;
+        border: 1px solid #dbe1ee;
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 0 8px 18px rgba(15,23,42,.16);
+        z-index: 30;
+    }
+    .block .meta .actions button[hidden] {
+        display: none !important;
+    }
+    .block .meta .block-action-menu[hidden] {
+        display: none !important;
+    }
+    .block .meta .block-action-menu button:hover { background: rgba(0,0,0,.06); color: #ef4444; }
+    .block .meta .block-action-menu .repeat-badge:hover { color: #4f46e5; }
+
+    .meta, .handle { 
+        user-select: none; 
+        -webkit-user-select: none; 
+        cursor: move;           /* .handle 也可改 cursor: ns-resize */
+    }
+    .block .text {
+        flex: 1;
+        padding: 6px 3px 6px 6px;
+        margin-right: 3px;
+        outline: none;
+
+        user-select: text; 
+        -webkit-user-select: text; 
+        cursor: text;
+        font-size: 14px;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .block .text::-webkit-scrollbar-track  {
+        background: rgb(247, 247, 247);
+        margin: 3px 0 6px 0;
+        border: 1px solid #999;
+        border-radius: 20px;
+    }
+    /* .block .text::-webkit-scrollbar  {width: 0;} */
+    .block .text::-webkit-scrollbar  {width: 7px;}
+    .block .text:hover::-webkit-scrollbar  {width: 7px;}
+    .block .text::-webkit-scrollbar-thumb  {
+        background: #8B8B8B;
+        border-radius: 20px;
+    }
+
+    .block .text[contenteditable="true"]:empty:before {
+        content: "輸入內容…";
+        color: #9ca3af;
+    }
+
+    /* 讓 resize 把手在上/下緣 */
+    .block[data-resizeable="true"] { touch-action: none; }
+    .block .handle {
+        position: absolute; left: 0; right: 0; 
+        height: 8px; cursor: ns-resize;
+    }
+    .block .handle.top { top: 0;}
+    .block .handle.bottom { bottom: 0;}
+
+    /* 週區間導覽列 */
+    .weekbar{
+        display:flex;
+        align-items:center;
+        justify-content: center;
+        gap:8px;
+        padding:8px 10px; background:#fbfbfe; border-bottom:1px solid var(--gray-mid);
+        position: relative;
+        min-height: 42px;
+        width: 100%;
+    }
+    /* 月曆連結靠左 */
+    .month-link {
+        position: absolute;
+        left: 8px;
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+        padding: 4px 8px;
+        cursor: pointer;
+        color: #333;
+        text-decoration: none;
+    }
+    .month-link .btn-word {
+        font-size: 15px;
+        font-weight: 900;
+        margin-left: 5px;
+        user-select: none;
+    }
+    .month-link:hover {
+        color: #4f46e5; /* hover 效果（可調整） */
+    }
+    .server-actions {
+        position: absolute;
+        left: 150px;
+        display: flex;
+        align-items: center;
+        min-width: 118px;
+        height: 24px;
+        pointer-events: none;
+    }
+    .status {
+        font-size: 14px;
+        font-weight: 600;
+        color: #374151;
+        line-height: 1;
+        white-space: nowrap;
+    }
+    .status.saving {
+        color: #2563eb;
+    }
+    .status.error {
+        color: #dc2626;
+    }
+    .weekbar-user-tools {
+        position: absolute;
+        right: 8px;
+        display: flex;
+        align-items: center;
+        /* gap: 8px; */
+    }
+    .user_name_popup {
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+        padding: 4px 8px;
+        cursor: pointer;
+        color: #333;
+        text-decoration: none;
+    }
+    .user_name_popup .btn-word {
+        font-size: 15px;
+        font-weight: 900;
+        margin-right: 5px;
+        user-select: none;
+    }
+    .user_name_popup:hover {
+        color: #4f46e5; /* hover 效果（可調整） */
+    }
+
+    .month-link,
+    .user_name_popup {
+        border-radius: 8px;
+    }
+    .month-link:hover,
+    .user_name_popup:hover {
+        color: #4f46e5;
+        background: rgba(79, 70, 229, .08);
+    }
+
+    .weekbar .btn-dir{ border:0; background:transparent; cursor:pointer; width:28px; height:28px; padding:0; }
+    .weekbar .range{ font-weight:600; color:#374151; }
+
+    /* topbar 每天顯示「日期 + 星期」 */
+    .topbar .cell .date{ display:block; font-weight:700; }
+    .topbar .cell .wk  { display:block; font-size:12px; color:#6b7280; }

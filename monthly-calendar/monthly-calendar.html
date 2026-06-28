@@ -1,0 +1,330 @@
+  <!DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Monthly Calendar</title>
+      <!--font awesome cdn-->
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"/>
+      <!--css file-->
+      <link rel="stylesheet" href="monthly-calendar.css" />
+      <link rel="stylesheet" href="calendar-unit.css" />
+      <link rel="stylesheet" href="day-panel.css" />
+
+      <link rel="stylesheet" href="login-input.css" />
+      <link rel="stylesheet" href="login-buttons.css" />
+      <link rel="stylesheet" href="login-msg_panel.css" />
+      <style>
+        :root{
+          --colW: 125px;
+          --rowH: 102px;
+          --gap:  1px;
+        }
+        * {
+          font-family: "poppins", sans-serif;
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+        body {
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-direction: column;
+        }
+        .server-actions{ 
+          /* margin-top:12px; */
+          /* display:flex; */
+          /* gap:8px; */
+          /* flex-wrap:wrap; */
+          position: absolute;
+          left: 139px;
+        }
+        .server-actions button{ 
+          padding:8px 12px;
+          border-radius:8px;
+          border:1px solid #ddd;
+          background:#fff;
+          cursor:pointer;
+        }
+        .server-actions .danger{ color:#b00020; }
+        .server-actions .muted{ color:#666; }
+      </style>
+    </head>
+    <body>
+      <div class="overall_calendars"><div id="calendars"></div></div>
+      <!-- 伺服器互動 UI -->
+      <!-- <div class="server-actions">
+        <span id="save-status" class="status">—</span>
+      </div> -->
+      <div class="user-dialog-overlay" id="user-dialog-overlay"></div>
+      <div class="user-dialog">
+        <div style="display: flex; flex-direction: column; padding: 10px 13px;
+        border-radius: 10px; box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.2); background: #fff;">
+          <!-- <label for="textInput">請輸入8個數字，超過會顯示警告：</label> -->
+          <div id="dialog-close">
+            <a><div id="dialog-close-btn"><i class="fa-regular fa-circle-xmark"></i></div></a>
+          </div>
+          <!-- <i class="fa-solid fa-xmark"></i> -->
+            <div style="display: flex; justify-content: space-between;">
+              <div id="counter">已輸入 0 / 8 number</div>            
+              <div id="warningText">
+                <div class="exclamation_css">
+                  <!-- <i class="fa-solid fa-exclamation"></i> -->
+                  <i class="fa-solid fa-ban"></i>
+                </div>
+                Input too long. Please check!
+              </div>
+              <!-- <div id="warningText">⚠️ 超過字數，請確認內容！</div> -->
+            </div>
+          <div class="input-box">
+            <input type="text" id="textInput" maxlength="100" required autocomplete="off">
+            <label class="hint-wording">login-in name</label>
+          </div>
+          <div style="display: flex; justify-content: space-between; gap:8px; margin-top: 5px;">
+            <button type="button" class="btn btn-bright-green btn-column"><i class="fa-solid fa-broom"></i><span class="btn-small-wording">clear</span></button>
+            <button type="button" class="btn btn-primary">Log-in</button>
+          </div>
+        </div>
+      </div>
+      <script src="calendar-account.js"></script>
+      <script src="monthly-calendar.js"></script>
+      <script src="task-list.js"></script>
+      <script src="day-panel.js"></script>
+
+      <script src="login-msg_panel.js"></script>
+      <script>
+      const PLUS_SVG = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+      <path d="M320 112C434.9 112 528 205.1 528 320C528 434.9 434.9 528 320 528C205.1 528 112 434.9 112 320C112 205.1 205.1 112 320 112zM320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM231 231C221.6 240.4 221.6 255.6 231 264.9L286 319.9L231 374.9C221.6 384.3 221.6 399.5 231 408.8C240.4 418.1 255.6 418.2 264.9 408.8L319.9 353.8L374.9 408.8C384.3 418.2 399.5 418.2 408.8 408.8C418.1 399.4 418.2 384.2 408.8 374.9L353.8 319.9L408.8 264.9C418.2 255.5 418.2 240.3 408.8 231C399.4 221.7 384.2 221.6 374.9 231L319.9 286L264.9 231C255.5 221.6 240.3 221.6 231 231z"/>
+      </svg>`;
+      const TRASH_SVG = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+      <path d="M232.7 69.9C237.1 56.8 249.3 48 263.1 48L377 48C390.8 48 403 56.8 407.4 69.9L416 96L512 96C529.7 96 544 110.3 544 128C544 145.7 529.7 160 512 160L128 160C110.3 160 96 145.7 96 128C96 110.3 110.3 96 128 96L224 96L232.7 69.9zM128 208L512 208L512 512C512 547.3 483.3 576 448 576L192 576C156.7 576 128 547.3 128 512L128 208zM216 272C202.7 272 192 282.7 192 296L192 488C192 501.3 202.7 512 216 512C229.3 512 240 501.3 240 488L240 296C240 282.7 229.3 272 216 272zM320 272C306.7 272 296 282.7 296 296L296 488C296 501.3 306.7 512 320 512C333.3 512 344 501.3 344 488L344 296C344 282.7 333.3 272 320 272zM424 272C410.7 272 400 282.7 400 296L400 488C400 501.3 410.7 512 424 512C437.3 512 448 501.3 448 488L448 296C448 282.7 437.3 272 424 272z"/>
+      </svg>`;
+      const SORT_SVG = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+      <path d="M288 104C288 81.9 270.1 64 248 64L200 64C177.9 64 160 81.9 160 104L160 152C160 174.1 177.9 192 200 192L248 192C270.1 192 288 174.1 288 152L288 104zM288 296C288 273.9 270.1 256 248 256L200 256C177.9 256 160 273.9 160 296L160 344C160 366.1 177.9 384 200 384L248 384C270.1 384 288 366.1 288 344L288 296zM160 488L160 536C160 558.1 177.9 576 200 576L248 576C270.1 576 288 558.1 288 536L288 488C288 465.9 270.1 448 248 448L200 448C177.9 448 160 465.9 160 488zM480 104C480 81.9 462.1 64 440 64L392 64C369.9 64 352 81.9 352 104L352 152C352 174.1 369.9 192 392 192L440 192C462.1 192 480 174.1 480 152L480 104zM352 296L352 344C352 366.1 369.9 384 392 384L440 384C462.1 384 480 366.1 480 344L480 296C480 273.9 462.1 256 440 256L392 256C369.9 256 352 273.9 352 296zM480 488C480 465.9 462.1 448 440 448L392 448C369.9 448 352 465.9 352 488L352 536C352 558.1 369.9 576 392 576L440 576C462.1 576 480 558.1 480 536L480 488z"/>
+      </svg>`;
+      const DAY_SVG = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+      <path d="M216 64C229.3 64 240 74.7 240 88L240 128L400 128L400 88C400 74.7 410.7 64 424 64C437.3 64 448 74.7 448 88L448 128L480 128C515.3 128 544 156.7 544 192L544 480C544 515.3 515.3 544 480 544L160 544C124.7 544 96 515.3 96 480L96 192C96 156.7 124.7 128 160 128L192 128L192 88C192 74.7 202.7 64 216 64zM480 496C488.8 496 496 488.8 496 480L496 416L408 416L408 496L480 496zM496 368L496 288L408 288L408 368L496 368zM360 368L360 288L280 288L280 368L360 368zM232 368L232 288L144 288L144 368L232 368zM144 416L144 480C144 488.8 151.2 496 160 496L232 496L232 416L144 416zM280 416L280 496L360 496L360 416L280 416zM216 176L160 176C151.2 176 144 183.2 144 192L144 240L496 240L496 192C496 183.2 488.8 176 480 176L216 176z"/>
+      </svg>`;
+      const EDIT_SVG = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+      <path d="M505 122.9L517.1 135C526.5 144.4 526.5 159.6 517.1 168.9L488 198.1L441.9 152L471 122.9C480.4 113.5 495.6 113.5 504.9 122.9zM273.8 320.2L408 185.9L454.1 232L319.8 366.2C316.9 369.1 313.3 371.2 309.4 372.3L250.9 389L267.6 330.5C268.7 326.6 270.8 323 273.7 320.1zM437.1 89L239.8 286.2C231.1 294.9 224.8 305.6 221.5 317.3L192.9 417.3C190.5 425.7 192.8 434.7 199 440.9C205.2 447.1 214.2 449.4 222.6 447L322.6 418.4C334.4 415 345.1 408.7 353.7 400.1L551 202.9C579.1 174.8 579.1 129.2 551 101.1L538.9 89C510.8 60.9 465.2 60.9 437.1 89zM152 128C103.4 128 64 167.4 64 216L64 488C64 536.6 103.4 576 152 576L424 576C472.6 576 512 536.6 512 488L512 376C512 362.7 501.3 352 488 352C474.7 352 464 362.7 464 376L464 488C464 510.1 446.1 528 424 528L152 528C129.9 528 112 510.1 112 488L112 216C112 193.9 129.9 176 152 176L264 176C277.3 176 288 165.3 288 152C288 138.7 277.3 128 264 128L152 128z"/>
+      </svg>`;
+      const DRAG_SVG = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+      <path d="M136 176C122.7 176 112 186.7 112 200C112 213.3 122.7 224 136 224L304 224C339.3 224 368 252.7 368 288C368 323.3 339.3 352 304 352L200 352C186.7 352 176 362.7 176 376C176 389.3 186.7 400 200 400L352 400C356.5 400 360.9 401.3 364.7 403.6L428.7 443.6C435.7 448 440 455.7 440 464L440 488C440 501.3 429.3 512 416 512C402.7 512 392 501.3 392 488L392 477.3L345.1 448L200 448C160.2 448 128 415.8 128 376C128 336.2 160.2 304 200 304L304 304C312.8 304 320 296.8 320 288C320 279.2 312.8 272 304 272L136 272C96.2 272 64 239.8 64 200C64 160.2 96.2 128 136 128L345.6 128C392.3 128 436.5 149.5 465.3 186.3L543.7 286.4C564.6 313.1 576 346.1 576 380.1L576 488C576 501.3 565.3 512 552 512C538.7 512 528 501.3 528 488L528 380.1C528 356.9 520.2 334.3 505.9 316L427.5 215.9C407.8 190.7 377.6 176 345.6 176L136 176z"/>
+      </svg>`;
+
+      // 在頁面關閉前盡力送出（最佳努力）
+      window.addEventListener('beforeunload', () => {
+        if (pendingSave) {
+          navigator.sendBeacon('/calendar', new Blob([JSON.stringify(dayTasks)], { type: 'application/json' }));
+        }
+      });
+      // 渲染某一天的任務清單（僅產生 DOM；不在此綁任何 per-row 事件）
+      function renderTaskList(li, dateKey, opts = {}) {
+        const listEl = li.querySelector('.task-list');
+        if (!listEl) return;
+
+        // 1) 取資料 + 清空容器
+        const arr = getList(dateKey); // e.g. [{id, text}, ...]
+        listEl.textContent = '';      // 比 innerHTML 更快、更安全
+
+        // 3) 用 fragment 批量插入，減少重排/重繪
+        const frag = document.createDocumentFragment();
+
+        for (let i = 0; i < arr.length; i++) {
+          const item = arr[i];
+          // console.log(item)
+
+          const row = document.createElement('div');
+          row.className = 'task-item';
+          row.dataset.id = item.id;
+          if (opts.selectedId && item.id === opts.selectedId) {
+            row.classList.add('selected');
+          }
+
+          // —— 拖曳把手（交由容器事件委派 mousedown/up 控制 draggable）——
+          const drag = document.createElement('div');
+          drag.className = 'icon-btn drag-handle';
+          drag.innerHTML = SORT_SVG;
+          drag.setAttribute('aria-label', '拖曳排序');
+
+          // —— 文字輸入（交由容器事件委派 input/keydown 處理資料）——
+          const input = document.createElement('div');
+          input.className = 'task-text';
+          input.textContent = item.text || '';
+
+          const show_start_time = document.createElement('div');
+          show_start_time.className = 'task-text time';
+          show_start_time.textContent = item.start_time || '';
+
+          // const input = document.createElement('input');
+          // input.type = 'text';
+          // input.value = item.text || '';
+          // input.placeholder = '新增事項…';
+          // input.autocomplete = 'off';
+          // input.spellcheck = false;
+          // input.inputMode = 'text';
+
+          // // —— 刪除按鈕（交由容器事件委派 click 處理刪除）——
+          // const del = document.createElement('div');
+          // del.className = 'icon-btn task-del';
+          // del.innerHTML = TRASH_SVG;
+          // del.title = '刪除';
+          // del.setAttribute('role', 'button');
+          // del.tabIndex = 0;
+
+          row.appendChild(drag);
+          row.appendChild(input);
+          row.appendChild(show_start_time);
+          // row.appendChild(del);
+
+          frag.appendChild(row);
+        }
+
+        listEl.appendChild(frag);
+
+        // 4) 選擇性：渲染完後自動聚焦某一列的 input
+        if (opts.autoFocusId) {
+          li.querySelector(`.task-item[data-id="${opts.autoFocusId}"] input`)?.focus();
+        }
+      }
+
+      // 給某一天的某一筆 item 安排 start_time / end_time
+      // 規則：
+      //  1. 找出同一天 list 其他任務的最晚 end_time
+      //  2. 若最晚 end_time > 17:30 → 固定 16:30~17:30
+      //  3. 否則 → start = 最晚 end_time, end = 最晚 end_time + 60 分鐘
+      //  4. 若當天沒有任何 end_time → 用預設 08:00~09:00（你可改）
+      function assignTimeForItem(list, item) {
+        const clamp1730 = hmToMin('17:30');
+        let latestEndMin = -Infinity;
+
+        for (const it of list) {
+          if (it === item) continue;           // 不要算到自己
+          const endMin = hmToMin(it?.end_time);
+          if (endMin != null && endMin > latestEndMin) {
+            latestEndMin = endMin;
+          }
+        }
+
+        let startMin, endMin;
+
+        if (latestEndMin === -Infinity) {
+          // 尚無任何任務有 end_time
+          startMin = hmToMin('08:00');        // 可改預設起點
+          endMin   = startMin + 60;
+        } else if (latestEndMin > clamp1730) {
+          // 最晚的 end_time 已經超過 17:30
+          startMin = hmToMin('16:30');
+          endMin   = hmToMin('17:30');
+        } else {
+          // 其餘 → 接在最後一筆後面 60 分
+          startMin = latestEndMin;
+          endMin   = latestEndMin + 60;
+        }
+
+        item.start_time = minToHm(startMin);
+        item.end_time   = minToHm(endMin);
+      }
+
+      /* 計算拖曳時，應該插到哪一個元素之前 */
+      function getDragAfterElement(container, mouseY) { // container為.task-list
+        // 這行會拿到「除了正在移動的那個項目以外」的所有項目
+        const els = [...container.querySelectorAll('.task-item:not(.dragging)')];
+        // console.log(els) //[div.task-item, div.task-item]
+        // 一開始給它 Number.NEGATIVE_INFINITY(負無限大), 意思是「目前還沒有找到任何候選元素」
+        let closest = { offset: Number.NEGATIVE_INFINITY, element: null };
+        // 用這些項目的位置（getBoundingClientRect()）去判斷目前該把.dragging插到哪裡
+        els.forEach(el => {
+          const box = el.getBoundingClientRect();
+          const offset = mouseY - (box.top + box.height / 2);
+          // offset < 0：滑鼠在這個元素的中線「上方」。
+          // offset > closest.offset：比目前記錄的更接近滑鼠。
+          if (offset < 0 && offset > closest.offset) {
+            closest = { offset, element: el };
+          }
+        });
+        // 整個清單跑完後，closest.element 會是滑鼠下方最近的元素
+        // 找到的那個「應該插在它前面的元素」；若沒有找到（代表滑鼠在最底部），就回傳 null。
+        // 回傳整個task-item元素 e.g. <div class="task-item" data-id="tmh2...">...</div>
+        //console.log(closest.element)
+        return closest.element;
+      }
+      // 點到 task-item：切換選取狀態（並讓 icon-btn 出現）
+      calendarContainer.addEventListener('click', (e) => {
+        // 先阻止往 document 冒泡（放最前面，避免上方 return 直接跳走）
+        // e.stopPropagation();
+
+        // ✅ 1) 點到 header 任何地方：都算容器內，但不跑日期格邏輯
+        if (e.target.closest(".calendar-header")) { return; }
+
+        // 1) 先找日期格（不管點到哪個子元素）
+        const cell = e.target.closest('li[data-tooltip]');
+        if (!cell || !calendarContainer.contains(cell)) return;
+
+        // ✅ 只有真的點到日期格，才阻止冒泡（避免 document 外部點擊收起）
+        // 先阻止往 document 冒泡（放最前面，避免上方 return 直接跳走）
+        e.stopPropagation();
+        // 第一次點該格就建立 UI
+        ensureTaskUI(cell);
+        // console.log('trigger calendarContainer')
+
+        // 2)🧹 清理該日期的空白任務（例如重新載入或點擊時）
+        const dateKey = cell.getAttribute('data-tooltip');
+        const arr = getList(dateKey);
+        const before = arr.length;
+        // 過濾掉 text 為空的任務
+        dayTasks[dateKey] = arr.filter(x => x.text && x.text.trim() !== '');
+        if (dayTasks[dateKey].length !== before) {
+          persist(); renderTaskList(cell, dateKey);
+        }
+        // 3) 只在點到「cell 空白」時才切換 + 按鈕
+        // const addBtn = cell.querySelector('.task-add-btn');
+        // if (!addBtn) return;
+        const add_edit_btn = cell.querySelector('.task-edit-btn');
+        if (!add_edit_btn) return;
+
+        const clickedRow     = !!e.target.closest('.task-item');      // 點到任務項目（.task-item）
+        const clickedEditBtn  = !!e.target.closest('.task-edit-btn'); // 點到 + 按鈕本身
+        const clickedList    = !!e.target.closest('.task-list');      // 點到清單容器（任務列表背景）
+        const clickedIcon    = !!e.target.closest('.icon-btn');       // 點到刪除／拖曳等圖示
+        // 在容器內非 task-list / task-item / + 按鈕 的點擊，一律取消選取
+        if (!clickedRow && !clickedList && !clickedEditBtn) {
+          selectedTaskId = null;
+          calendarContainer.querySelectorAll('.task-item.selected')
+            .forEach(el => el.classList.remove('selected'));
+        }
+        // 點到 + / 任務區（含清單與任務）/ 圖示 ==> 保持顯示
+        if (clickedEditBtn || clickedList || clickedRow || clickedIcon) {
+          // 可選：若想僅顯示單一格的 +，先關掉其他格的
+          calendarContainer.querySelectorAll('.task-edit-btn.visible')
+            .forEach(btn => { if (btn !== add_edit_btn) btn.classList.remove('visible'); });
+          return;
+        }
+        calendarContainer.querySelectorAll('.task-edit-btn.visible')
+          .forEach(btn => { if (btn !== add_edit_btn) btn.classList.remove('visible'); });
+          add_edit_btn.classList.toggle('visible');
+      });
+      // === 取代你原本的 document 監聽器：只在「容器外」才清理 ===
+      document.addEventListener('click', (e) => {
+        if (calendarContainer.contains(e.target)) {   // ← 把這段復活
+          console.log('trigger in calendarContainer'); return;
+        }
+        // console.log('trigger out of calendarContainer')
+        // 容器外點擊：清除選取、收起所有 +
+        selectedTaskId = null;
+        calendarContainer.querySelectorAll('.task-item.selected')
+          .forEach(el => el.classList.remove('selected'));
+        calendarContainer.querySelectorAll('.task-edit-btn.visible')
+          .forEach(btn => btn.classList.remove('visible'));
+      });
+      </script>
+    </body>
+  </html>
