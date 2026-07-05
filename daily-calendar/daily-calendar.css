@@ -234,10 +234,23 @@ select {
   flex-direction: column;
   gap: 9px;
   margin: 0;
-  padding: 0;
-  max-height: 524px;
+  padding: 0 4px 0 0;
+  height: 430px;
   overflow-y: auto;
   overflow-x: hidden;
+}
+
+.evergreen-list::-webkit-scrollbar {
+  width: 0;
+}
+
+.evergreen-list:hover::-webkit-scrollbar {
+  width: 7px;
+}
+
+.evergreen-list::-webkit-scrollbar-thumb {
+  background: #c7cbd6;
+  border-radius: 999px;
 }
 
 .evergreen-item {
@@ -250,6 +263,13 @@ select {
   border-radius: 8px;
   background: #fffdf5;
   padding: 8px 10px;
+  transition: background .15s ease, border-color .15s ease, opacity .15s ease;
+  cursor: pointer;
+}
+
+.evergreen-item:hover {
+  border-color: #fde68a;
+  background: #fffbeb;
 }
 
 .evergreen-item.is-dragging {
@@ -502,6 +522,14 @@ select {
   font-size: 17px;
 }
 
+.filters .edit-mode-toggle {
+  margin-left: 0;
+}
+
+.filters #editModeToggle {
+  order: 5;
+}
+
 .edit-mode-toggle i,
 .edit-mode-toggle i::before {
   display: block;
@@ -516,13 +544,17 @@ select {
 }
 
 .delete-all {
-  margin-left: 0;
+  margin-left: auto;
+  order: 4;
   color: #b91c1c;
-  display: none;
+  display: inline-flex;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .daily-edit-mode .delete-all {
-  display: inline-flex;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .delete-all:hover {
@@ -810,6 +842,10 @@ select {
   grid-column: 1 / -1;
 }
 
+.edit-date-field {
+  grid-column: 1 / -1;
+}
+
 .evergreen-edit-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1084,7 +1120,7 @@ select {
   }
 
   .evergreen-list {
-    max-height: 220px;
+    max-height: none;
   }
 
   .time-pair {

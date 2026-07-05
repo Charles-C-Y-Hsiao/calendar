@@ -58,6 +58,9 @@
             <a href="/week/" class="week-link" title="切換到週曆">
               <i class="fi fi-rc-calendar-week"></i><span class="btn-word">week-mode</span>
             </a>
+            <a href="/day/" class="day-link" title="切換到日曆">
+              <i class="fi fi-rc-calendar-day"></i><span class="btn-word">day-mode</span>
+            </a>
             <div class="server-actions">
               <span id="save-status" class="status">—</span>
             </div>

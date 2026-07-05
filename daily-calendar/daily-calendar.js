@@ -60,6 +60,7 @@ const els = {
   taskEditClose: document.getElementById('taskEditClose'),
   taskEditCancel: document.getElementById('taskEditCancel'),
   taskEditSave: document.getElementById('taskEditSave'),
+  editTaskDate: document.getElementById('editTaskDate'),
   editStartTime: document.getElementById('editStartTime'),
   editEndTime: document.getElementById('editEndTime'),
   editTaskInput: document.getElementById('editTaskInput'),
@@ -180,6 +181,9 @@ function bindEvents() {
   els.taskEditClose.addEventListener('click', closeTaskEditor);
   els.taskEditCancel.addEventListener('click', closeTaskEditor);
   els.taskEditSave.addEventListener('click', saveTaskEditor);
+  els.editStartTime.addEventListener('change', () => {
+    els.editEndTime.value = getOneHourEndTime(els.editStartTime.value);
+  });
   els.editTaskInput.addEventListener('keydown', event => {
     if (event.key === 'Enter') saveTaskEditor();
     if (event.key === 'Escape') closeTaskEditor();
@@ -599,6 +603,7 @@ function openTaskEditor(id) {
   const item = dayItems.find(entry => entry.id === id);
   if (!item) return;
   editingItemId = id;
+  els.editTaskDate.value = formatDate(currentDate);
   els.editStartTime.value = item.start_time || '08:00';
   els.editEndTime.value = item.end_time || '09:00';
   els.editTaskInput.value = item.text || '';
@@ -714,26 +719,57 @@ async function scheduleEvergreenToday(id) {
 }
 
 async function saveTaskEditor() {
-  const item = dayItems.find(entry => entry.id === editingItemId);
+  const editingId = editingItemId;
+  const item = dayItems.find(entry => entry.id === editingId);
   if (!item) return;
   const text = els.editTaskInput.value.trim();
+  const sourceDateKey = formatDate(currentDate);
+  const targetDateKey = els.editTaskDate.value;
+  const targetDate = parseDateKey(targetDateKey);
   const start = els.editStartTime.value;
   const end = els.editEndTime.value;
   if (!text) {
     els.editTaskInput.focus();
     return;
   }
+  if (!targetDate) {
+    els.editTaskDate.focus();
+    return;
+  }
   if (hhmmToTotal(start) >= hhmmToTotal(end)) {
     setStatus('時間錯誤', 'error');
     return;
   }
-  item.text = text;
-  item.start_time = start;
-  item.end_time = end;
+  const nextItem = {
+    ...item,
+    text,
+    start_time: start,
+    end_time: end,
+  };
   closeTaskEditor();
+  if (targetDateKey === sourceDateKey) {
+    Object.assign(item, nextItem);
+    sortItems();
+    renderTodos();
+    await saveCurrentDay();
+    return;
+  }
+
+  dayItems = dayItems.filter(entry => entry.id !== editingId);
   sortItems();
   renderTodos();
-  await saveCurrentDay();
+  await saveItemsForDate(sourceDateKey, dayItems);
+
+  const targetItems = await loadItemsForDate(targetDateKey);
+  const nextTargetItems = sortItemList([
+    ...targetItems.filter(entry => entry.id !== nextItem.id),
+    nextItem,
+  ]);
+  await saveItemsForDate(targetDateKey, nextTargetItems);
+  currentDate = targetDate;
+  dayItems = nextTargetItems;
+  updateDateHeader();
+  renderTodos();
 }
 
 function openDailyConfirmDialog({ title, message, okText = 'OK', cancelText = 'Cancel', danger = false }) {
@@ -1059,6 +1095,29 @@ async function saveCurrentDay() {
   }
 }
 
+async function loadItemsForDate(dateKey) {
+  const res = await fetch(`/schedule?from=${dateKey}&to=${dateKey}`, {
+    headers: { 'X-User-Id': userId },
+  });
+  if (!res.ok) throw new Error('load failed');
+  const data = await res.json();
+  return normalizeItems(data[dateKey] || []);
+}
+
+async function saveItemsForDate(dateKey, items) {
+  const res = await fetch(`/schedule/${dateKey}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-User-Id': userId,
+      'X-Client-Id': DAILY_CLIENT_ID,
+    },
+    body: JSON.stringify(items),
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok || json.ok === false) throw new Error(json.error || 'save failed');
+}
+
 function normalizeItems(items) {
   return (Array.isArray(items) ? items : [])
     .filter(item => item && typeof item === 'object')
@@ -1092,7 +1151,11 @@ function normalizeEvergreenItems(items) {
 }
 
 function sortItems() {
-  dayItems.sort((a, b) => {
+  sortItemList(dayItems);
+}
+
+function sortItemList(items) {
+  return items.sort((a, b) => {
     const time = String(a.start_time || '').localeCompare(String(b.start_time || ''));
     if (time !== 0) return time;
     return String(a.text || '').localeCompare(String(b.text || ''));
@@ -1155,6 +1218,12 @@ function fillTimeOptions(select, selectedValue) {
     html += `<option value="${value}"${value === selectedValue ? ' selected' : ''}>${value}</option>`;
   }
   select.innerHTML = html;
+}
+
+function getOneHourEndTime(startValue) {
+  if (!isHhmm(startValue)) return '09:00';
+  const endTotal = Math.min(hhmmToTotal(startValue) + 60, 19 * 60);
+  return totalToHhmm(endTotal);
 }
 
 function openUserDialog() {

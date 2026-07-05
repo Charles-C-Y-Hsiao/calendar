@@ -36,9 +36,9 @@
     position: relative;
   }
   /* 週曆連結靠左 */
-  .week-link {
+  .week-link,
+  .day-link {
     position: absolute;
-    left: 0;
     font-size: 20px;
     display: flex;
     align-items: center;
@@ -47,12 +47,21 @@
     color: #333;
     text-decoration: none;
   }
+  .week-link {
+    left: 0;
+  }
+  .day-link {
+    left: 132px;
+  }
   .week-link i,
-  .week-link i::before {
+  .week-link i::before,
+  .day-link i,
+  .day-link i::before {
     display: block;
     line-height: 1;
   }
-  .week-link .btn-word {
+  .week-link .btn-word,
+  .day-link .btn-word {
     font-size: 15px;
     font-weight: 900;
     margin-left: 5px;
@@ -62,6 +71,18 @@
 
   .week-link:hover {
     color: #4f46e5; /* hover 效果（可調整） */
+  }
+
+  .day-link:hover {
+    color: #4f46e5;
+  }
+
+  .server-actions {
+    position: absolute;
+    left: 285px;
+    display: flex;
+    align-items: center;
+    min-width: 86px;
   }
 
   .user_name_popup {

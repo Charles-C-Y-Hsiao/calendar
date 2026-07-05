@@ -3,9 +3,19 @@
   // === 更新頁面上的顯示名稱 ===
   function updateUserNameUI(name) {
     const span = document.querySelector(".user_name_popup .btn-word");
-    if (!span) return;
-    span.textContent = `Hi, ${name}`;
+    if (span) span.textContent = `Hi, ${name}`;
+    updateModeLinks(name);
   }
+
+  function updateModeLinks(name) {
+    const q = `?userId=${encodeURIComponent(name)}`;
+    document.querySelectorAll('.week-link').forEach(link => { link.href = `/week/${q}`; });
+    document.querySelectorAll('.day-link').forEach(link => { link.href = `/day/${q}`; });
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    updateModeLinks(user_name);
+  });
 
   bindCalendarUserStorageSync((nextUserId) => {
     if (nextUserId === user_name) return;

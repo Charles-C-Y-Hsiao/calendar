@@ -305,20 +305,95 @@
   "2026-07-01": [],
   "2026-07-02": [
     {
-      "id": "tmqwn5558ufkx",
+      "id": "dmr2o9wko5m2khf",
       "start_time": "08:00",
       "end_time": "09:00",
-      "text": "routine meeting",
-      "availabilityPeople": [],
-      "repeatGroupId": "rg-mqwn5553-c97z2s",
-      "repeatScope": "2026-07",
-      "repeatPattern": "weekly",
-      "repeatYearMonth": "2026-07",
-      "repeatDaysLabel": "WED, THU"
+      "text": "1",
+      "completed": false
+    },
+    {
+      "id": "dmr2o9x3ntaxg9f",
+      "start_time": "08:00",
+      "end_time": "09:00",
+      "text": "2",
+      "completed": false
+    },
+    {
+      "id": "dmr2o9yelq7uzn3",
+      "start_time": "08:00",
+      "end_time": "09:00",
+      "text": "4",
+      "completed": false
     }
   ],
-  "2026-07-03": [],
-  "2026-07-06": [],
+  "2026-07-03": [
+    {
+      "id": "dmr2o9xn0gxb63x",
+      "start_time": "10:00",
+      "end_time": "11:00",
+      "text": "3",
+      "completed": false
+    }
+  ],
+  "2026-07-06": [
+    {
+      "id": "dmr7zflmvzcy8hn",
+      "start_time": "08:00",
+      "end_time": "09:00",
+      "text": "1",
+      "completed": false
+    },
+    {
+      "id": "dmr80rpbaq044gb",
+      "start_time": "08:00",
+      "end_time": "09:00",
+      "text": "5",
+      "completed": false
+    },
+    {
+      "id": "dmr80rqre2fla36",
+      "start_time": "08:00",
+      "end_time": "09:00",
+      "text": "6",
+      "completed": false
+    },
+    {
+      "id": "dmr80rrxvb3fy2y",
+      "start_time": "08:00",
+      "end_time": "09:00",
+      "text": "7",
+      "completed": false
+    },
+    {
+      "id": "dmr80rvbyvs9yy1",
+      "start_time": "08:00",
+      "end_time": "09:00",
+      "text": "8",
+      "completed": false
+    },
+    {
+      "id": "dmr7zfmicdhnngl",
+      "start_time": "09:00",
+      "end_time": "10:00",
+      "text": "2",
+      "completed": false
+    },
+    {
+      "id": "dmr7zfneg1ihb5m",
+      "start_time": "10:00",
+      "end_time": "11:00",
+      "text": "3",
+      "completed": false
+    },
+    {
+      "id": "dmr7zgk8qbipdmz",
+      "start_time": "11:00",
+      "end_time": "12:00",
+      "text": "Project2",
+      "completed": false,
+      "sourceEvergreenId": "edmqxs4xhwmpbf0o"
+    }
+  ],
   "2026-07-07": [],
   "2026-07-08": [
     {
@@ -618,13 +693,76 @@
   ],
   "_evergreen": [
     {
+      "id": "edmr80sd66t8a5gf",
+      "text": "10",
+      "priority": "high",
+      "status": "active",
+      "completed": false,
+      "createdAt": "2026-07-05T16:43:06.030Z",
+      "order": 0
+    },
+    {
+      "id": "edmr80s9jkv3t095",
+      "text": "9",
+      "priority": "high",
+      "status": "active",
+      "completed": false,
+      "createdAt": "2026-07-05T16:43:01.328Z",
+      "order": 1
+    },
+    {
+      "id": "edmr80s81t2wf0e5",
+      "text": "8",
+      "priority": "high",
+      "status": "active",
+      "completed": false,
+      "createdAt": "2026-07-05T16:42:59.393Z",
+      "order": 2
+    },
+    {
+      "id": "edmr80s6qb8hyonz",
+      "text": "6",
+      "priority": "high",
+      "status": "archived",
+      "completed": false,
+      "createdAt": "2026-07-05T16:42:57.683Z",
+      "order": 3
+    },
+    {
+      "id": "edmr80s5d7v7ov9j",
+      "text": "5",
+      "priority": "high",
+      "status": "active",
+      "completed": false,
+      "createdAt": "2026-07-05T16:42:55.915Z",
+      "order": 4
+    },
+    {
+      "id": "edmr80s3y3nz3ydf",
+      "text": "4",
+      "priority": "high",
+      "status": "active",
+      "completed": false,
+      "createdAt": "2026-07-05T16:42:54.075Z",
+      "order": 5
+    },
+    {
+      "id": "edmr80s1ycr1k6qq",
+      "text": "53",
+      "priority": "high",
+      "status": "active",
+      "completed": false,
+      "createdAt": "2026-07-05T16:42:51.492Z",
+      "order": 6
+    },
+    {
       "id": "edmqxs4xhwmpbf0o",
       "text": "Project2",
       "priority": "high",
       "status": "active",
       "completed": false,
       "createdAt": "2026-06-28T12:43:13.940Z",
-      "order": 0
+      "order": 7
     },
     {
       "id": "edmqxs3xbk92ptz0",
@@ -634,7 +772,23 @@
       "completed": false,
       "createdAt": "2026-06-28T12:42:27.056Z",
       "updatedAt": "2026-06-28T12:42:42.407Z",
-      "order": 1
+      "order": 8
     }
-  ]
+  ],
+  "2026-07-04": [
+    {
+      "id": "tmqwn5558ufkx",
+      "start_time": "13:30",
+      "end_time": "14:30",
+      "text": "routine meeting",
+      "availabilityPeople": [],
+      "repeatGroupId": "rg-mqwn5553-c97z2s",
+      "repeatScope": "2026-07",
+      "repeatPattern": "weekly",
+      "repeatYearMonth": "2026-07",
+      "repeatDaysLabel": "WED, THU",
+      "completed": true
+    }
+  ],
+  "2026-07-05": []
 }
