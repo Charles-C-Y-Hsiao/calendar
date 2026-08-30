@@ -1,0 +1,226 @@
+  /* Task list inside each calendar date cell. */
+  .task-list {
+    /* width: 100%; */
+    width: calc(100% - 4px);
+    margin-top: 1px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 55px;
+  }
+
+  .task-list::-webkit-scrollbar-track  {
+    /* background: rgb(30, 30, 30); */
+    border: 1px solid #999;
+    border-radius: 20px;
+  }
+
+  .task-list::-webkit-scrollbar  {
+    width: 0;
+  }
+
+  .task-list:hover::-webkit-scrollbar  {
+    width: 7px;
+  }
+
+  .task-list::-webkit-scrollbar-thumb  {
+    background: #8B8B8B; 
+    border-radius: 20px;
+  }
+  .task-list:hover::-webkit-scrollbar-thumb  {
+    background: #636363; 
+  }
+
+  /* .task-list:hover {
+    outline: 2px solid rgba(211,212,213,.5);
+    outline-offset: 0px;
+    border-radius: 3px;
+  } */
+  /* Optional keyboard-focus treatment. */
+  /* .task-list:focus {
+    outline: 2px solid #0034c4;
+    outline-offset: 2px;
+    border-radius: 3px;
+  } */
+
+
+  /* Task row. */
+  .task-item {
+    /* display: grid; */
+    /* Drag handle | task text | time. */
+    /* grid-template-columns: 22px 1fr 22px;  */
+    display: flex;
+
+    align-items: center;
+    gap: 2px;
+    /* padding: 2px 3px; */
+    border: 0.5px solid #e0e0e0;
+    border-radius: 8px;
+    background: #fff;
+    margin-inline: 1px;
+  }
+
+  /* Task text truncates within the date cell. */
+  .task-item .task-text {
+    width: 100%;
+    /* flex: 1; */
+    text-align: left;
+    /* border: 1px solid #e0e0e0; */
+    border: none;
+    border-radius: 6px;
+    padding: 1px 8px 1px 5px;
+    font-size: 12px;
+    outline: none; 
+
+    /* Keep each task on one line. */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    /* Optional character-based width limit. */
+    /* max-width: 20em; */
+  }
+  .task-item .task-text.time {
+    border: none;
+    padding: 0;
+    width: 50px;
+  }
+
+  /* .task-item input {
+    width: 100%;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 12px;
+    outline: none;
+  } */
+
+  .task-item .task-text:focus {
+    border-color: #0034c4;
+    box-shadow: 0 0 0 3px rgba(0,52,196,.1);
+  }
+
+  /* .task-item input:focus {
+    border-color: #0034c4;
+    box-shadow: 0 0 0 3px rgba(0,52,196,.1);
+  } */
+
+  /* Add-task control. */
+  .task-add-btn {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    width: 22px;
+    /* height: 22px; */
+    border: 1px solid #e0e0e0;
+    border-radius: 50%;
+    background: #fff;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,.06);
+
+    /* Hidden until the cell is active. */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .15s ease;
+  }
+  .task-add-btn.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+  .task-add-btn:hover { box-shadow: 0 3px 10px rgba(0,0,0,.12); }
+
+  /* Edit-task control. */
+  .task-edit-btn {
+    position: absolute;
+    right: 5px;
+    bottom: 5px;
+    width: 22px;
+    /* height: 22px; */
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    background: #fff;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,.06);
+
+    /* Hidden until the cell is active. */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .15s ease;
+  }
+  .task-edit-btn.visible {
+    opacity: 1;
+    visibility: visible;
+  }
+  .task-edit-btn:hover { box-shadow: 0 3px 10px rgba(0,0,0,.12); }
+
+  /* Shared icon button. */
+  .icon-btn {
+    width: 20px;
+    /* height: 22px; */
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    border-radius: 6px;
+  }
+  .icon-btn:hover { background: #f2f4f7; }
+
+  /* Hide row icons until the task is selected. */
+  .task-item .icon-btn {
+    opacity: 0;
+    visibility: hidden;
+    display: none;
+    transition: opacity .15s ease;
+  }
+
+  /* Reveal icons for the selected task. */
+  .task-item.selected .icon-btn {
+    opacity: 1;
+    visibility: visible;
+    display: grid;
+  }
+
+  /* Keep the drag handle visible while dragging. */
+  .task-item.dragging .icon-btn {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* Selected-row highlight. */
+  .task-item.selected {
+    box-shadow: 0 0 0 2px rgba(0,52,196,.08);
+    border-color: #c9d6ff;
+  }
+
+  /* Dragging state. */
+  .task-item.dragging {
+    opacity: .6;
+    border-style: dashed;
+  }
+
+  /* Date cells anchor their local action controls. */
+  li[data-tooltip] { position: relative; }
+
+  /* Remove extra spacing beneath the date label. */
+  li[data-tooltip] .month { margin-bottom: 0px; }
+
+  /* Inline input used when creating a day task. */
+  .day-task-input {
+    width: calc(100% - 5px);
+    padding: 4px 8px;
+    font-size: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    background: #fff;
+    outline: none;
+    box-shadow: 0 2px 6px rgba(0,0,0,.06);
+  }
+  .day-task-input:focus {
+    border-color: #0034c4;
+    box-shadow: 0 0 0 3px rgba(0,52,196,.1);
+  }

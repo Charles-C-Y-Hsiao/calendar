@@ -1,0 +1,98 @@
+/* module_id: action-dialogs */
+/* Shared action-dialog primitives used by Daily, Monthly and Weekly. */
+.action-dialog-overlay,
+.dt-dialog-overlay,
+.daily-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, .28);
+  z-index: 9999;
+}
+
+.action-dialog,
+.dt-dialog,
+.daily-confirm-dialog {
+  box-sizing: border-box;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, .3);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.action-dialog, .dt-dialog { min-width: 360px; max-width: 1050px; max-height: 80vh; padding: 15px 20px 9px; }
+.daily-confirm-dialog { width: min(360px, calc(100vw - 40px)); padding: 18px; }
+.daily-account-confirm { width: min(430px, calc(100vw - 40px)); padding: 20px 18px 14px; position: relative; }
+.daily-confirm-title { color: #111827; font-size: 17px; font-weight: 900; }
+.daily-confirm-message { margin-top: 8px; color: #6b7280; font-size: 14px; line-height: 1.45; }
+.daily-confirm-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+.daily-confirm-ok, .daily-confirm-cancel { border: 0; border-radius: 8px; cursor: pointer; padding: 8px 12px; font-weight: 900; }
+.daily-confirm-ok { background: #4f46e5; color: #fff; }
+.daily-confirm-ok.is-danger { background: #dc2626; }
+.daily-confirm-cancel { background: #e5e7eb; color: #1f2937; }
+.daily-confirm-ok:disabled { cursor: not-allowed; opacity: .45; }
+
+.action-alert-dialog { width: min(520px, calc(100vw - 40px)); }
+.action-alert-title { margin: 0 0 8px; font-size: 17px; font-weight: 700; color: #111827; }
+.action-alert-message { margin: 0; color: #4b5563; white-space: pre-wrap; }
+.action-alert-actions { display: flex; justify-content: flex-end; margin-top: 18px; }
+.action-alert-ok { border: 0; border-radius: 8px; padding: 8px 18px; background: #4f46e5; color: #fff; cursor: pointer; }
+.action-alert-ok:hover { background: #4338ca; }
+
+.action-confirm-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: min(520px, calc(100vw - 40px));
+}
+.action-confirm-dialog .action-alert-title { margin: 0; }
+.action-confirm-dialog .action-alert-message {
+  box-sizing: border-box;
+  height: 85px;
+  text-align: left;
+  align-self: stretch;
+}
+.action-confirm-dialog .action-alert-actions {
+  gap: 8px;
+  margin-top: 0;
+}
+.action-confirm-ok,
+.action-confirm-cancel {
+  min-width: 64px;
+  padding: 4px 10px;
+  font-size: 13px;
+  border: 0;
+  border-radius: 18px;
+  cursor: pointer;
+}
+.action-confirm-ok { background: #4f46e5; color: #fff; }
+.action-confirm-ok:hover { background: #4338ca; }
+.action-confirm-ok.is-danger { background: #dc2626; }
+.action-confirm-ok.is-danger:hover { background: #b91c1c; }
+.action-confirm-cancel { background: #e4e4e4; color: #333; }
+.action-confirm-cancel:hover { background: #d4d4d4; }
+
+.action-dialog-demo {
+  box-sizing: border-box;
+  width: min(680px, calc(100vw - 32px));
+  margin: 40px auto;
+  padding: 24px;
+  border: 1px solid #dbe3f0;
+  border-radius: 12px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.action-dialog-demo h1 { margin: 0 0 8px; color: #111827; font-size: 24px; }
+.action-dialog-demo p { color: #64748b; }
+.action-dialog-demo-actions { display: flex; gap: 10px; }
+.action-dialog-demo-actions button {
+  border: 0;
+  border-radius: 8px;
+  padding: 9px 14px;
+  background: #4f46e5;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 700;
+}
+.action-dialog-demo-actions button:hover { background: #4338ca; }
+.action-dialog-demo-result { min-height: 24px; color: #334155; font-weight: 600; }

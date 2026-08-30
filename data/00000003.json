@@ -302,7 +302,19 @@
       "repeatDaysLabel": "MON, WED"
     }
   ],
-  "2026-07-01": [],
+  "2026-07-01": [
+    {
+      "id": "tms0nbbl2b06b",
+      "start_time": "08:00",
+      "end_time": "09:00",
+      "text": "routine meeting",
+      "repeatGroupId": "rg-mqwn5553-c97z2s",
+      "repeatScope": "2026-07",
+      "repeatPattern": "weekly",
+      "repeatYearMonth": "2026-07",
+      "repeatDaysLabel": "WED, THU, SAT"
+    }
+  ],
   "2026-07-02": [
     {
       "id": "dmr2o9wko5m2khf",
@@ -324,6 +336,17 @@
       "end_time": "09:00",
       "text": "4",
       "completed": false
+    },
+    {
+      "id": "tms0nbbl20qw8",
+      "start_time": "08:00",
+      "end_time": "09:00",
+      "text": "routine meeting",
+      "repeatGroupId": "rg-mqwn5553-c97z2s",
+      "repeatScope": "2026-07",
+      "repeatPattern": "weekly",
+      "repeatYearMonth": "2026-07",
+      "repeatDaysLabel": "WED, THU, SAT"
     }
   ],
   "2026-07-03": [
@@ -397,7 +420,7 @@
   "2026-07-07": [],
   "2026-07-08": [
     {
-      "id": "tmqwn55583sdp",
+      "id": "tms0nbbl28dbz",
       "start_time": "08:00",
       "end_time": "09:00",
       "text": "routine meeting",
@@ -405,64 +428,35 @@
       "repeatScope": "2026-07",
       "repeatPattern": "weekly",
       "repeatYearMonth": "2026-07",
-      "repeatDaysLabel": "WED, THU"
+      "repeatDaysLabel": "WED, THU, SAT"
     }
   ],
-  "2026-07-09": [],
+  "2026-07-09": [
+    {
+      "id": "tms0nbbl26ew8",
+      "start_time": "08:00",
+      "end_time": "09:00",
+      "text": "routine meeting",
+      "repeatGroupId": "rg-mqwn5553-c97z2s",
+      "repeatScope": "2026-07",
+      "repeatPattern": "weekly",
+      "repeatYearMonth": "2026-07",
+      "repeatDaysLabel": "WED, THU, SAT"
+    }
+  ],
   "2026-07-10": [],
-  "2026-07-13": [
-    {
-      "id": "av_mqwoexnh_wktn3",
-      "start_time": "08:30",
-      "end_time": "09:30",
-      "text": "",
-      "type": "availability",
-      "availabilityFrom": "2026-07-13",
-      "availabilityTo": "2026-07-20",
-      "availabilityWeekdays": [
-        0,
-        1,
-        2,
-        3,
-        4
-      ],
-      "availabilityGroupId": "av_mqwoe30u_lnnsq",
-      "availabilityPeople": [
-        {
-          "name": "Chia Vacation",
-          "status": "not-free"
-        }
-      ]
-    }
-  ],
-  "2026-07-14": [
-    {
-      "id": "av_mqwoexnh_xjgzm",
-      "start_time": "08:30",
-      "end_time": "09:30",
-      "text": "",
-      "type": "availability",
-      "availabilityFrom": "2026-07-13",
-      "availabilityTo": "2026-07-20",
-      "availabilityWeekdays": [
-        0,
-        1,
-        2,
-        3,
-        4
-      ],
-      "availabilityGroupId": "av_mqwoe30u_lnnsq",
-      "availabilityPeople": [
-        {
-          "name": "Chia Vacation",
-          "status": "not-free"
-        }
-      ]
-    }
-  ],
+  "2026-07-13": [],
+  "2026-07-14": [],
   "2026-07-15": [
     {
-      "id": "tmqwn5558e0oi",
+      "id": "dms0lrkhcq22vk3",
+      "start_time": "08:00",
+      "end_time": "09:30",
+      "text": "12345",
+      "availabilityPeople": []
+    },
+    {
+      "id": "tms0nbbl2f6et",
       "start_time": "08:00",
       "end_time": "09:00",
       "text": "routine meeting",
@@ -471,35 +465,217 @@
       "repeatScope": "2026-07",
       "repeatPattern": "weekly",
       "repeatYearMonth": "2026-07",
-      "repeatDaysLabel": "WED, THU"
+      "repeatDaysLabel": "WED, THU, SAT"
     },
     {
-      "id": "av_mqwoexnh_atb0s",
+      "id": "av_ms0nxcpk_95itq",
       "start_time": "09:00",
       "end_time": "10:00",
       "text": "",
       "type": "availability",
-      "availabilityFrom": "2026-07-13",
-      "availabilityTo": "2026-07-20",
+      "availabilityFrom": "2026-07-15",
+      "availabilityTo": "2026-07-15",
       "availabilityWeekdays": [
-        0,
-        1,
-        2,
-        3,
-        4
+        2
       ],
-      "availabilityGroupId": "av_mqwoe30u_lnnsq",
+      "availabilityGroupId": "av_ms0lrxkh_lo9i3",
       "availabilityPeople": [
         {
-          "name": "Chia Vacation",
-          "status": "not-free"
+          "name": "ERIC",
+          "status": "free"
         }
       ]
+    },
+    {
+      "id": "av_ms0m0z30_nk2zb",
+      "start_time": "12:30",
+      "end_time": "13:30",
+      "text": "",
+      "type": "availability",
+      "availabilityFrom": "2026-07-15",
+      "availabilityTo": "2026-07-15",
+      "availabilityWeekdays": [
+        2
+      ],
+      "availabilityGroupId": "av_ms0m0mzj_9p0e2",
+      "availabilityPeople": [
+        {
+          "name": "CY",
+          "status": "free"
+        }
+      ]
+    },
+    {
+      "id": "dms0m2w4um16s2f",
+      "start_time": "14:00",
+      "end_time": "15:00",
+      "text": "22",
+      "availabilityPeople": []
     }
   ],
   "2026-07-16": [
     {
-      "id": "tmqwn5558lkwu",
+      "id": "tms0nbbl2k5ba",
+      "start_time": "08:00",
+      "end_time": "09:00",
+      "text": "routine meeting",
+      "repeatGroupId": "rg-mqwn5553-c97z2s",
+      "repeatScope": "2026-07",
+      "repeatPattern": "weekly",
+      "repeatYearMonth": "2026-07",
+      "repeatDaysLabel": "WED, THU, SAT"
+    }
+  ],
+  "2026-07-17": [],
+  "2026-07-20": [],
+  "2026-07-21": [],
+  "2026-07-22": [
+    {
+      "id": "tms0nbbl2zawx",
+      "start_time": "08:00",
+      "end_time": "09:30",
+      "text": "routine meeting",
+      "availabilityPeople": [],
+      "repeatGroupId": "rg-mqwn5553-c97z2s",
+      "repeatScope": "2026-07",
+      "repeatPattern": "weekly",
+      "repeatYearMonth": "2026-07",
+      "repeatDaysLabel": "WED, THU, SAT"
+    },
+    {
+      "id": "tms0njsyksyp9",
+      "start_time": "08:30",
+      "end_time": "09:30",
+      "text": "453666",
+      "availabilityPeople": []
+    },
+    {
+      "id": "tms0na9tcpobi",
+      "start_time": "10:30",
+      "end_time": "11:30",
+      "text": "123",
+      "availabilityPeople": []
+    }
+  ],
+  "2026-07-23": [
+    {
+      "id": "tms0nangmebxs",
+      "start_time": "08:30",
+      "end_time": "09:30",
+      "text": "222",
+      "availabilityPeople": []
+    },
+    {
+      "id": "tms0nbbl2v97x",
+      "start_time": "08:00",
+      "end_time": "09:00",
+      "text": "routine meeting",
+      "repeatGroupId": "rg-mqwn5553-c97z2s",
+      "repeatScope": "2026-07",
+      "repeatPattern": "weekly",
+      "repeatYearMonth": "2026-07",
+      "repeatDaysLabel": "WED, THU, SAT"
+    }
+  ],
+  "2026-07-24": [
+    {
+      "id": "av_ms20wu04_k87ds",
+      "start_time": "08:30",
+      "end_time": "10:30",
+      "text": "",
+      "type": "availability",
+      "availabilityFrom": "2026-07-24",
+      "availabilityTo": "2026-07-31",
+      "availabilityWeekdays": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "availabilityGroupId": "av_mqwoe30u_lnnsq",
+      "availabilityPeople": [
+        {
+          "name": "Chia Vacation",
+          "status": "not-free"
+        }
+      ]
+    }
+  ],
+  "2026-07-27": [
+    {
+      "id": "tms14n1i2krmw",
+      "start_time": "08:00",
+      "end_time": "09:00",
+      "text": "Daily Mgmt",
+      "availabilityPeople": []
+    },
+    {
+      "id": "tms14nakyvkcv",
+      "start_time": "09:00",
+      "end_time": "10:00",
+      "text": "ALI report",
+      "availabilityPeople": []
+    },
+    {
+      "id": "tms14nnpu8sll",
+      "start_time": "11:00",
+      "end_time": "12:00",
+      "text": "MCHP report",
+      "availabilityPeople": []
+    },
+    {
+      "id": "av_ms20wu04_1xk31",
+      "start_time": "08:30",
+      "end_time": "10:30",
+      "text": "",
+      "type": "availability",
+      "availabilityFrom": "2026-07-24",
+      "availabilityTo": "2026-07-31",
+      "availabilityWeekdays": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "availabilityGroupId": "av_mqwoe30u_lnnsq",
+      "availabilityPeople": [
+        {
+          "name": "Chia Vacation",
+          "status": "not-free"
+        }
+      ]
+    }
+  ],
+  "2026-07-28": [
+    {
+      "id": "av_ms20wu04_nr01m",
+      "start_time": "08:30",
+      "end_time": "10:30",
+      "text": "",
+      "type": "availability",
+      "availabilityFrom": "2026-07-24",
+      "availabilityTo": "2026-07-31",
+      "availabilityWeekdays": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "availabilityGroupId": "av_mqwoe30u_lnnsq",
+      "availabilityPeople": [
+        {
+          "name": "Chia Vacation",
+          "status": "not-free"
+        }
+      ]
+    }
+  ],
+  "2026-07-29": [
+    {
+      "id": "tms0nbbl2v8x1",
       "start_time": "08:00",
       "end_time": "09:00",
       "text": "routine meeting",
@@ -508,41 +684,16 @@
       "repeatScope": "2026-07",
       "repeatPattern": "weekly",
       "repeatYearMonth": "2026-07",
-      "repeatDaysLabel": "WED, THU"
+      "repeatDaysLabel": "WED, THU, SAT"
     },
     {
-      "id": "av_mqwoexnh_g27vu",
-      "start_time": "09:00",
-      "end_time": "10:00",
-      "text": "",
-      "type": "availability",
-      "availabilityFrom": "2026-07-13",
-      "availabilityTo": "2026-07-20",
-      "availabilityWeekdays": [
-        0,
-        1,
-        2,
-        3,
-        4
-      ],
-      "availabilityGroupId": "av_mqwoe30u_lnnsq",
-      "availabilityPeople": [
-        {
-          "name": "Chia Vacation",
-          "status": "not-free"
-        }
-      ]
-    }
-  ],
-  "2026-07-17": [
-    {
-      "id": "av_mqwoexnh_v3x5w",
+      "id": "av_ms20wu04_pwf1g",
       "start_time": "08:30",
-      "end_time": "09:30",
+      "end_time": "10:30",
       "text": "",
       "type": "availability",
-      "availabilityFrom": "2026-07-13",
-      "availabilityTo": "2026-07-20",
+      "availabilityFrom": "2026-07-24",
+      "availabilityTo": "2026-07-31",
       "availabilityWeekdays": [
         0,
         1,
@@ -557,90 +708,70 @@
           "status": "not-free"
         }
       ]
-    }
-  ],
-  "2026-07-20": [
-    {
-      "id": "av_mqwoexnh_kufia",
-      "start_time": "08:30",
-      "end_time": "09:30",
-      "text": "",
-      "type": "availability",
-      "availabilityFrom": "2026-07-13",
-      "availabilityTo": "2026-07-20",
-      "availabilityWeekdays": [
-        0,
-        1,
-        2,
-        3,
-        4
-      ],
-      "availabilityGroupId": "av_mqwoe30u_lnnsq",
-      "availabilityPeople": [
-        {
-          "name": "Chia Vacation",
-          "status": "not-free"
-        }
-      ]
-    }
-  ],
-  "2026-07-21": [],
-  "2026-07-22": [
-    {
-      "id": "tmqwn5558jknr",
-      "start_time": "08:00",
-      "end_time": "09:00",
-      "text": "routine meeting",
-      "repeatGroupId": "rg-mqwn5553-c97z2s",
-      "repeatScope": "2026-07",
-      "repeatPattern": "weekly",
-      "repeatYearMonth": "2026-07",
-      "repeatDaysLabel": "WED, THU"
-    }
-  ],
-  "2026-07-23": [
-    {
-      "id": "tmqwn55585z3o",
-      "start_time": "08:00",
-      "end_time": "09:00",
-      "text": "routine meeting",
-      "repeatGroupId": "rg-mqwn5553-c97z2s",
-      "repeatScope": "2026-07",
-      "repeatPattern": "weekly",
-      "repeatYearMonth": "2026-07",
-      "repeatDaysLabel": "WED, THU"
-    }
-  ],
-  "2026-07-24": [],
-  "2026-07-27": [],
-  "2026-07-28": [],
-  "2026-07-29": [
-    {
-      "id": "tmqwn5558gbsw",
-      "start_time": "08:00",
-      "end_time": "09:00",
-      "text": "routine meeting",
-      "repeatGroupId": "rg-mqwn5553-c97z2s",
-      "repeatScope": "2026-07",
-      "repeatPattern": "weekly",
-      "repeatYearMonth": "2026-07",
-      "repeatDaysLabel": "WED, THU"
     }
   ],
   "2026-07-30": [
     {
-      "id": "tmqwn5558rrwt",
+      "id": "tms0nbbl2soz2",
       "start_time": "08:00",
       "end_time": "09:00",
       "text": "routine meeting",
+      "availabilityPeople": [],
       "repeatGroupId": "rg-mqwn5553-c97z2s",
       "repeatScope": "2026-07",
       "repeatPattern": "weekly",
       "repeatYearMonth": "2026-07",
-      "repeatDaysLabel": "WED, THU"
+      "repeatDaysLabel": "WED, THU, SAT"
+    },
+    {
+      "id": "av_ms20wu04_7sk47",
+      "start_time": "08:30",
+      "end_time": "10:30",
+      "text": "",
+      "type": "availability",
+      "availabilityFrom": "2026-07-24",
+      "availabilityTo": "2026-07-31",
+      "availabilityWeekdays": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "availabilityGroupId": "av_mqwoe30u_lnnsq",
+      "availabilityPeople": [
+        {
+          "name": "Chia Vacation",
+          "status": "not-free"
+        }
+      ]
     }
   ],
-  "2026-07-31": [],
+  "2026-07-31": [
+    {
+      "id": "av_ms20wu04_uhbzl",
+      "start_time": "08:30",
+      "end_time": "10:30",
+      "text": "",
+      "type": "availability",
+      "availabilityFrom": "2026-07-24",
+      "availabilityTo": "2026-07-31",
+      "availabilityWeekdays": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "availabilityGroupId": "av_mqwoe30u_lnnsq",
+      "availabilityPeople": [
+        {
+          "name": "Chia Vacation",
+          "status": "not-free"
+        }
+      ]
+    }
+  ],
   "2026-06-29": [
     {
       "id": "av_mqwmrozd_79j3z",
@@ -693,31 +824,58 @@
   ],
   "_evergreen": [
     {
-      "id": "edmr80sd66t8a5gf",
-      "text": "10",
+      "id": "edmtd0x5h3jpp36p",
+      "text": "爸媽來台南",
+      "priority": "high",
+      "status": "done",
+      "completed": true,
+      "createdAt": "2026-08-28T14:05:04.887Z",
+      "order": 0
+    },
+    {
+      "id": "edms1zhkp58p8fzu",
+      "text": "出國!",
       "priority": "high",
       "status": "active",
       "completed": false,
+      "createdAt": "2026-07-26T15:59:48.233Z",
+      "order": 1
+    },
+    {
+      "id": "edms1kd45j93s9q2",
+      "text": "55",
+      "priority": "high",
+      "status": "archived",
+      "completed": false,
+      "createdAt": "2026-07-26T08:56:25.927Z",
+      "order": 2
+    },
+    {
+      "id": "edmr80sd66t8a5gf",
+      "text": "10",
+      "priority": "high",
+      "status": "archived",
+      "completed": false,
       "createdAt": "2026-07-05T16:43:06.030Z",
-      "order": 0
+      "order": 3
     },
     {
       "id": "edmr80s9jkv3t095",
       "text": "9",
       "priority": "high",
-      "status": "active",
+      "status": "archived",
       "completed": false,
       "createdAt": "2026-07-05T16:43:01.328Z",
-      "order": 1
+      "order": 4
     },
     {
       "id": "edmr80s81t2wf0e5",
       "text": "8",
       "priority": "high",
-      "status": "active",
+      "status": "archived",
       "completed": false,
       "createdAt": "2026-07-05T16:42:59.393Z",
-      "order": 2
+      "order": 5
     },
     {
       "id": "edmr80s6qb8hyonz",
@@ -726,69 +884,194 @@
       "status": "archived",
       "completed": false,
       "createdAt": "2026-07-05T16:42:57.683Z",
-      "order": 3
+      "order": 6
     },
     {
       "id": "edmr80s5d7v7ov9j",
       "text": "5",
       "priority": "high",
-      "status": "active",
+      "status": "archived",
       "completed": false,
       "createdAt": "2026-07-05T16:42:55.915Z",
-      "order": 4
+      "order": 7
     },
     {
       "id": "edmr80s3y3nz3ydf",
       "text": "4",
       "priority": "high",
-      "status": "active",
+      "status": "archived",
       "completed": false,
       "createdAt": "2026-07-05T16:42:54.075Z",
-      "order": 5
+      "order": 8,
+      "updatedAt": "2026-07-26T08:53:43.830Z"
     },
     {
       "id": "edmr80s1ycr1k6qq",
       "text": "53",
       "priority": "high",
-      "status": "active",
+      "status": "archived",
       "completed": false,
       "createdAt": "2026-07-05T16:42:51.492Z",
-      "order": 6
+      "order": 9
     },
     {
       "id": "edmqxs4xhwmpbf0o",
       "text": "Project2",
       "priority": "high",
-      "status": "active",
+      "status": "archived",
       "completed": false,
       "createdAt": "2026-06-28T12:43:13.940Z",
-      "order": 7
+      "order": 10
     },
     {
       "id": "edmqxs3xbk92ptz0",
       "text": "PJ1",
       "priority": "high",
-      "status": "active",
+      "status": "archived",
       "completed": false,
       "createdAt": "2026-06-28T12:42:27.056Z",
       "updatedAt": "2026-06-28T12:42:42.407Z",
-      "order": 8
+      "order": 11
     }
   ],
   "2026-07-04": [
     {
-      "id": "tmqwn5558ufkx",
-      "start_time": "13:30",
-      "end_time": "14:30",
+      "id": "tms0nbbl2mp46",
+      "start_time": "08:00",
+      "end_time": "09:00",
       "text": "routine meeting",
-      "availabilityPeople": [],
       "repeatGroupId": "rg-mqwn5553-c97z2s",
       "repeatScope": "2026-07",
       "repeatPattern": "weekly",
       "repeatYearMonth": "2026-07",
-      "repeatDaysLabel": "WED, THU",
-      "completed": true
+      "repeatDaysLabel": "WED, THU, SAT"
     }
   ],
-  "2026-07-05": []
+  "2026-07-05": [],
+  "2026-07-26": [
+    {
+      "id": "dms1zhdm7jqo0ih",
+      "start_time": "08:00",
+      "end_time": "09:00",
+      "text": "收行李",
+      "completed": false
+    }
+  ],
+  "2026-07-11": [
+    {
+      "id": "tms0nbbl2xaxg",
+      "start_time": "08:00",
+      "end_time": "09:00",
+      "text": "routine meeting",
+      "repeatGroupId": "rg-mqwn5553-c97z2s",
+      "repeatScope": "2026-07",
+      "repeatPattern": "weekly",
+      "repeatYearMonth": "2026-07",
+      "repeatDaysLabel": "WED, THU, SAT"
+    }
+  ],
+  "2026-07-18": [
+    {
+      "id": "tms0nbbl2ug2g",
+      "start_time": "08:00",
+      "end_time": "09:00",
+      "text": "routine meeting",
+      "repeatGroupId": "rg-mqwn5553-c97z2s",
+      "repeatScope": "2026-07",
+      "repeatPattern": "weekly",
+      "repeatYearMonth": "2026-07",
+      "repeatDaysLabel": "WED, THU, SAT"
+    }
+  ],
+  "2026-07-25": [],
+  "2026-08-01": [],
+  "2026-08-02": [],
+  "2026-08-24": [
+    {
+      "id": "dmt6l14atfqhc2y",
+      "start_time": "08:00",
+      "end_time": "09:00",
+      "text": "修改程式",
+      "completed": false
+    },
+    {
+      "id": "dmt6y47s14qiwu2",
+      "start_time": "08:00",
+      "end_time": "09:00",
+      "text": "Project2",
+      "completed": false,
+      "sourceEvergreenId": "edmqxs4xhwmpbf0o"
+    },
+    {
+      "id": "dmt6zhzxx3jgx8x",
+      "start_time": "16:30",
+      "end_time": "17:30",
+      "text": "格式統一完成",
+      "completed": false
+    }
+  ],
+  "2026-08-28": [
+    {
+      "id": "dmtcxttrhu5i2wj",
+      "start_time": "08:00",
+      "end_time": "09:00",
+      "text": "出國!",
+      "completed": true,
+      "sourceEvergreenId": "edms1zhkp58p8fzu"
+    },
+    {
+      "id": "dmtcy7hqapcphrq",
+      "start_time": "08:00",
+      "end_time": "09:00",
+      "text": "出國!",
+      "completed": false,
+      "sourceEvergreenId": "edms1zhkp58p8fzu"
+    }
+  ],
+  "2026-08-30": [
+    {
+      "id": "dmtfy4zncd0zmcq",
+      "start_time": "08:00",
+      "end_time": "09:00",
+      "text": "全新的9月",
+      "completed": true
+    },
+    {
+      "id": "dmtfy5auz02kfbr",
+      "start_time": "08:00",
+      "end_time": "09:00",
+      "text": "這個月我要做什麼哩",
+      "completed": false
+    },
+    {
+      "id": "dmtfy5x7ffda6l3",
+      "start_time": "08:00",
+      "end_time": "09:00",
+      "text": "API的事情清理一下",
+      "completed": false
+    },
+    {
+      "id": "dmtfy6dmsyc2okt",
+      "start_time": "08:00",
+      "end_time": "09:00",
+      "text": "EIS data要整合",
+      "completed": false
+    },
+    {
+      "id": "dmtfy658obmrmsk",
+      "start_time": "08:00",
+      "end_time": "09:00",
+      "text": "Mail功能",
+      "completed": false
+    }
+  ],
+  "2026-08-31": [
+    {
+      "id": "dmtfy5n0kjoz413",
+      "start_time": "08:00",
+      "end_time": "09:00",
+      "text": "先把上課內容整理好",
+      "completed": false
+    }
+  ]
 }

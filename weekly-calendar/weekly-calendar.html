@@ -14,27 +14,26 @@
     <!-- interact.js -->
     <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 
-    <!-- dayjs嚗??撘?嚗?-->
+    <!-- dayjs date utility -->
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
 
     <link rel="stylesheet" href="weekly-calendar.css" />
-    <link rel="stylesheet" href="open-dialog.css" />
+    <link rel="stylesheet" href="../shared/action-dialogs/module.css" />
+    <link rel="stylesheet" href="weekly-date-time-dialog.css" />
     <link rel="stylesheet" href="recurring-schedule.css" />
     <link rel="stylesheet" href="availability-schedule.css" />
+    <link rel="stylesheet" href="weekly-account.css" />
 
-    <link rel="stylesheet" href="login-input.css" />
-    <link rel="stylesheet" href="login-buttons.css" />
-    <link rel="stylesheet" href="login-msg_panel.css" />
 
     <style>
       :root{
-        --hourHeight: 64px;    /* 瘥???摨?*/
-        --slot: 30;            /* 瘥撟曉???30 = ????*/
-        --slotHeight: calc(var(--hourHeight) * var(--slot) / 60); /* 瘥?? */
+        --hourHeight: 64px;    /* 每小時的顯示高度 */
+        --slot: 30;            /* 每個時間區段的分鐘數；30 代表半小時 */
+        --slotHeight: calc(var(--hourHeight) * var(--slot) / 60); /* 每個時間區段的高度 */
         --days: 7;
-        --dayWidth: 140px;     /* 瘥予甈祝 */
-        --headerH: 42px;       /* 憭拇?憿?摨?*/
-        --rulerW: 70px;        /* 撌血??撠箏祝 */
+        --dayWidth: 140px;     /* 每日欄位寬度 */
+        --headerH: 42px;       /* 日期標題列高度 */
+        --rulerW: 70px;        /* 左側時間尺寬度 */
         --gap: 1px;
         --bg: #fff;
         --line: #e7e7ea;
@@ -42,10 +41,10 @@
         --block: #eef2ff;
         --block-border: #c7d2fe;
         --block-text: #111827;
-        --gray-deep:  #c7d2fe;  /* 瘛梁嚗??＊????????*/
-        --gray-mid:   #d9dbe9;  /* 銝剔嚗over ????*/
-        --gray-light: #ececf3;  /* 瘛箇嚗蜓閬???*/
-        --gray-soft:  #f5f5f8;  /* ?瘛∠嚗? #fafafa ?湔?摮??*/
+        --gray-deep:  #c7d2fe;  /* 深層邊框與醒目狀態 */
+        --gray-mid:   #d9dbe9;  /* 一般邊框與 hover 狀態 */
+        --gray-light: #ececf3;  /* 淺色分隔線 */
+        --gray-soft:  #f5f5f8;  /* 柔和背景色 */
       }
 
       * { 
@@ -55,9 +54,12 @@
       }
       body {
         margin: 0; background: #f6f7fb; color: #222;
-        display: grid; place-items: start center; 
-        padding: 24px;
-        min-height: 100vh;
+        display: grid; place-items: center;
+        padding: 5px 24px;
+        min-height: calc(100vh - 10px);
+        height: auto;
+        max-height: none;
+        overflow: hidden;
         position: relative;
       }
 
@@ -84,10 +86,10 @@
           <button type="button" class="bulk-schedule-btn invite-btn" title="Availability">
             <i class="fi fi-rr-invite-alt"></i>
           </button>
-          <button type="button" class="bulk-schedule-btn" id="bulkScheduleBtn" title="?寞活?箏?隞餃?">
+          <button type="button" class="bulk-schedule-btn" id="bulkScheduleBtn" title="管理週期項目">
             <i class="fi fi-rr-admin-alt"></i>
           </button>
-          <a href="#" class="user_name_popup" id ="show-user-name">
+          <a href="#" class="user_name_popup account-user-trigger" id ="show-user-name">
             <span class="btn-word">Hi, 00666888</span><i class="fa-regular fa-user"></i>
           </a>
         </div>
@@ -95,53 +97,51 @@
 
       <div class="topbar" id="topbar">
         <div class="cell ruler">時間</div>
-        <!-- 7 憭拇?憿???JS ??撱箇? -->
+        <!-- 七天的日期標題由 JavaScript 產生 -->
       </div>
 
       <div class="content" id="content">
         <div class="ruler" id="ruler"></div>
-        <!-- 7 憭拇?雿???JS ??撱箇? -->
+        <!-- 七天的內容欄位由 JavaScript 產生 -->
       </div>
     </div>
     <div class="user-dialog-overlay" id="user-dialog-overlay"></div>
     <div class="user-dialog">
-      <div style="display: flex; flex-direction: column; padding: 10px 13px;
-      border-radius: 10px; box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.2); background: #fff;">
-        <!-- <label for="textInput">隢撓???摮?頞??＊蝷箄郎??</label> -->
+      <div class="weekly-account-dialog">
+        <!-- <label for="textInput">請輸入 8 位數帳號</label> -->
         <div id="dialog-close">
             <a><div id="dialog-close-btn"><i class="fa-regular fa-circle-xmark"></i></div></a>
         </div>
+        <div class="account-dialog-title">Account</div>
         <!-- <i class="fa-solid fa-xmark"></i> -->
-          <div style="display: flex; justify-content: space-between;">
-            <div id="counter">撌脰撓??0 / 8 number</div>
-            <!-- <div id="warningText">?? 頞?摮嚗?蝣箄??批捆嚗?/div> -->
-            <div id="warningText">?? Input too long. Please check!</div>
+          <div class="weekly-account-counter-row">
+            <div id="counter">Entered 0 / 8 characters</div>
           </div>
         <div class="input-box">
-          <input type="text" id="textInput" maxlength="100" required autocomplete="off">
+          <input type="text" id="textInput" inputmode="numeric" maxlength="8" pattern="[0-9]{0,8}" required autocomplete="off">
           <label class="hint-wording">login-in name</label>
         </div>
-        <div style="display: flex; justify-content: space-between; gap:8px; margin-top: 5px;">
-          <button type="button" class="btn btn-bright-green btn-column"><i class="fa-solid fa-broom"></i><span class="btn-small-wording">clear</span></button>
+        <div class="weekly-account-actions">
+          <button type="button" class="secondary" id="clearUser"><span>Clear</span></button>
           <button type="button" class="btn btn-primary">Log-in</button>
         </div>
       </div>
     </div>
-    <script src="calendar-account.js"></script>
-    <script src="setupElements.js"></script>
-    <script src="TopbarRulerAndDays.js"></script>
-    <script src="CreateGhostOrBlock.js"></script>
-    <script src="interact-drag-resize.js"></script>
-    <script src="PreAndNextWeek.js"></script>
-    <script src="open-dialog.js"></script>
+    <script src="weekly-account.js"></script>
+    <script src="weekly-persistence.js"></script>
+    <script src="weekly-navigation.js"></script>
+    <script src="weekly-block-creation.js"></script>
+    <script src="weekly-block-interaction.js"></script>
+    <script src="weekly-date-time-dialog.js"></script>
+    <script src="../shared/action-dialogs/module.js"></script>
     <script src="weekly-calendar-core.js"></script>
     <script src="availability-schedule.js"></script>
     <script src="recurring-schedule.js"></script>
-    <script src="login-msg_panel.js"></script>
+    <script src="weekly-account-adapter.js"></script>
     <script>
   
-      /* ===================== ??瘚? ===================== */
-      // Demo 雿輻
+      /* ===================== 基本設定 ===================== */
+      // Demo 用法
       // function addBlock(setupInteract, { top, height, dayIndex }) {
       //   const block = createBlockElement({ top, height, dayIndex });
       //   dayCols[dayIndex].appendChild(block);
@@ -150,23 +150,23 @@
       //   return block;
       // }
       
-      // --- ?曹??箔??梯絲暺??單?望撠望? 1 ??0嚗?--
+      // 設定每週起始日：1 代表星期一，0 代表星期日。
       const WEEK_STARTS_ON = 1; // 1=Mon, 0=Sun
 
-      // 撌亙嚗????
+      // 取得指定日期所在週的起始日。
       function startOfWeek(date, weekStartsOn = WEEK_STARTS_ON){
         const d = new Date(date);
         const day = d.getDay();
-        const diff = (day - weekStartsOn + 7) % 7; // 敺??圈梯絲暺?
+        const diff = (day - weekStartsOn + 7) % 7; // 計算回推至每週起始日的天數。
         d.setDate(d.getDate() - diff);
         d.setHours(0,0,0,0);
         return d;
       }
-      // 雿閬?025-11-02 ?予?舀?梁? SUN?蝷箇??舫見韏瑕?嚗?
+      // 如需測試固定日期，可改用下方的 2025-11-02。
       // const currentRefDate = new Date('2025-11-02');
-      const currentRefDate = new Date(); // 銋?寞?隞予
+      const currentRefDate = new Date(); // 目前日期
       
-      let viewStart = startOfWeek(currentRefDate, WEEK_STARTS_ON); // ?祇梯絲憪??曹?嚗?
+      let viewStart = startOfWeek(currentRefDate, WEEK_STARTS_ON); // 當前顯示週的起始日
       // console.log({viewStart})
 
       function updateWeekRangeLabel(){
@@ -176,13 +176,13 @@
         rangeEl.textContent = `${from} — ${to}`;
       }
 
+      window.createWeeklyCalendarWebSocket = function (userId) {
+        const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+        return new WebSocket(`${protocol}://${location.host}/?userId=${encodeURIComponent(userId)}`);
+      };
+
       function connectCalendarWS(setupInteract) {
-        const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-        const wsHost = window.location.hostname;        // 靘? "localhost"
-        // const wsUrl = `${proto}://${location.host}`;   // 靘? ws://localhost:3010
-        const wsUrl = `${proto}://${location.host}/?userId=${encodeURIComponent(user_name)}`;
-        // const wsUrl = `${proto}://${wsHost}:3010/?userId=${encodeURIComponent(user_name)}`;
-        const ws    = new WebSocket(wsUrl);
+        const ws = window.createWeeklyCalendarWebSocket(user_name);
 
         ws.addEventListener('open', () => {
           console.log('[WS] connected (week view)');
@@ -199,7 +199,7 @@
 
           if (msg.type === 'calendar-init') {
             console.log('trigger calendar-init','viewStart',fmtDate(viewStart), msg.payload)
-            // 銝???撠望?啣???map
+            // 初始載入完整的行事曆資料 map。
             allSchedules = msg.payload || {};
             renderWeekFromMap(viewStart, setupInteract, allSchedules, getDayCols);
             setStatus('已載入 ✓');
@@ -209,7 +209,7 @@
               return;
             }
             console.log('trigger calendar-updated','viewStart',fmtDate(viewStart),msg.payload)
-            // 隞颱?蝔?嚗???嗡?嚗?唳?獢?嚗ㄐ??唳??啣???map
+            // 收到其他 client 的更新後，以最新資料 map 重新渲染本週。
             allSchedules = msg.payload || {};
             renderWeekFromMap(viewStart, setupInteract, allSchedules, getDayCols);
             setStatus('已同步 ✓');
@@ -218,7 +218,7 @@
 
         ws.addEventListener('close', () => {
           console.log('[WS] disconnected, retry in 3s...');
-          setTimeout(connectCalendarWS, 3000);
+          setTimeout(() => connectCalendarWS(setupInteract), 3000);
         });
 
         ws.addEventListener('error', (e) => {
@@ -227,30 +227,30 @@
       }
 
       document.addEventListener('DOMContentLoaded', async () => {
-        // 撠汗?? SVG
+        // 設定上週與下週按鈕的 SVG。
         document.getElementById('btnPrevWeek').innerHTML = left_SVG;
         document.getElementById('btnNextWeek').innerHTML = right_SVG;
         
-        // ???Ｙ? topbar / ruler / dayCols嚗??桀? viewStart嚗?
+        // 依 viewStart 初始化日期標題列、時間尺與每日欄位。
         initTopbarRulerAndDays(viewStart);
 
-        // ??霈?block ?瑕? drag / resize
+        // 初始化行程區塊的拖曳與調整大小功能。
         const setupInteract = initInteractForBlocks({ slotPx, stepY, stepX, getDayCols });
         window.weeklyCalendarBulkContext = { setupInteract, getDayCols };
-        initCreateGhostOrBlock(setupInteract); // ??day ?扳??遣蝡?ghost / block
-        // ????頛?園?
+        initCreateGhostOrBlock(setupInteract); // 在每日欄位建立預覽或正式行程區塊。
+        // 載入目前顯示週的資料。
         await loadWeek(viewStart, setupInteract, getDayCols);
         connectCalendarWS(setupInteract);
         initRecurringScheduleDialog({ setupInteract, getDayCols });
 
         updateWeekRangeLabel();
-        // ? ??ㄐ
+        // 預留鍵盤操作綁定。
         // bindKeyboardControls();
 
         // // demo block
         // addBlock(setupInteract, { top: slotPx * 6, height: slotPx * 3, dayIndex: 1 });
 
-        // ??撌血??
+        // 綁定上週與下週切換按鈕。
         document.getElementById('btnPrevWeek').addEventListener('click', async () => {
           viewStart = addDays(viewStart, -7);
           initTopbarRulerAndDays(viewStart);

@@ -155,7 +155,7 @@
 
     deleteBtn.addEventListener('click', async () => {
       if (!state.editingGroupId) return;
-      if (!confirm('確定要刪除這組批次任務嗎？')) return;
+      if (!(await window.actionDialogs.confirm({ title: 'Delete recurring schedule?', message: 'Delete this recurring schedule group?', okText: 'Delete', cancelText: 'Cancel', danger: true }))) return;
       await deleteBulkGroup({
         groupId: state.editingGroupId,
         setupInteract,

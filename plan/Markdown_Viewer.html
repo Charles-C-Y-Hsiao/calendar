@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Plan Markdown Viewer</title>
+  <style>
+    :root{color-scheme:light;--bg:#f5f7fb;--paper:#fff;--text:#1e293b;--muted:#64748b;--line:#d8e0eb;--accent:#2563eb;--code:#f1f5f9}
+    *{box-sizing:border-box} body{margin:0;color:var(--text);background:var(--bg);font:16px/1.65 "Segoe UI","Noto Sans TC",Arial,sans-serif}
+    .shell{display:grid;grid-template-columns:290px minmax(0,1fr);min-height:100vh;transition:grid-template-columns 180ms ease}.sidebar{position:sticky;top:0;height:100vh;padding:24px 18px;border-right:1px solid var(--line);background:#eef3f9;overflow:auto}.sidebar h1{margin:0 0 6px;font-size:20px}.sidebar p{margin:0 0 18px;color:var(--muted);font-size:13px}.document-actions{display:grid;grid-template-columns:minmax(0,1fr) 35px;gap:8px;margin:0 0 18px}.sidebar-toggle{display:grid;place-items:center;width:35px;height:39px;min-height:39px;border:1px solid #b8c6d9;border-radius:8px;background:#fff;color:#1e3a5f;font:inherit;cursor:pointer}.sidebar-toggle:hover{color:var(--accent);border-color:var(--accent)}.sidebar-toggle-icon{display:block;width:9px;height:9px;border-bottom:2px solid currentColor;border-left:2px solid currentColor;transform:rotate(45deg);transition:transform 180ms ease}.shell.sidebar-collapsed{grid-template-columns:52px minmax(0,1fr)}.shell.sidebar-collapsed .sidebar{padding:12px 8px;overflow:hidden}.shell.sidebar-collapsed .sidebar>:not(.document-actions){display:none}.shell.sidebar-collapsed .document-actions{grid-template-columns:1fr;margin:0}.shell.sidebar-collapsed .open-file-button{display:none}.shell.sidebar-collapsed .sidebar-toggle-icon{transform:rotate(225deg)}.document-links{display:grid;gap:3px}.document-links a{display:block;padding:7px 8px;border-radius:6px;color:#334155;text-decoration:none;font-size:14px}.document-links a:hover{color:var(--accent);background:#fff}.open-file-button{width:100%;padding:5px 12px;height: 39px;border:1px solid #b8c6d9;border-radius:6px;background:#fff;color:#1e3a5f;font:inherit;font-weight:600;cursor:pointer}.open-file-button:hover{color:var(--accent);border-color:var(--accent)}#markdownFile{display:none}.content-wrap{padding:32px}.content{width:min(1120px,100%);margin:0 auto;padding:36px 44px;border:1px solid var(--line);border-radius:8px;background:var(--paper);box-shadow:0 18px 45px #0f172a14}.content h1,.content h2,.content h3{scroll-margin-top:20px}.content pre{padding:14px;overflow:auto;border-radius:6px;background:var(--code)}.content code{padding:2px 4px;border-radius:4px;background:var(--code)}.content table{border-collapse:collapse;width:100%}.content th,.content td{padding:7px 10px;border:1px solid var(--line)}.error{padding:16px;border:1px solid #fecaca;border-radius:6px;background:#fff1f2;color:#991b1b}@media(max-width:760px){.shell{display:block}.sidebar{position:static;height:auto}.content-wrap{padding:14px}.content{padding:22px 18px}}
+    .sidebar-toggle-icon{position:relative;left:2px;transition:left 180ms ease,transform 180ms ease}
+    .shell.sidebar-collapsed .sidebar-toggle-icon{left:-2px}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="document-actions"><button id="openMarkdownButton" class="open-file-button" type="button">開啟 Markdown 檔案</button><button id="sidebarToggle" class="sidebar-toggle" type="button" aria-label="收縮側欄" aria-expanded="true" title="收縮側欄"><span class="sidebar-toggle-icon" aria-hidden="true"></span></button></div>
+      <input id="markdownFile" type="file" accept=".md,text/markdown,text/plain">
+      <h1>Plan Markdown Viewer</h1>
+      <p id="documentName">Loading document...</p>
+      <nav id="documentLinks" class="document-links" aria-label="Plan 文件導航"></nav>
+    </aside>
+    <main class="content-wrap"><article id="content" class="content"><div>Loading Markdown...</div></article></main>
+  </div>
+  <script type="module">
+    import { marked } from "https://cdn.jsdelivr.net/npm/marked@15/+esm";
+    const defaultDirectory = "./";
+    const defaultDocument = "db_naming.md";
+    const documents = [
+      ["行事曆功能逐項驗證計畫", "07_13_01_16_calendar-feature-verification-plan.md"],
+      ["Daily 端到端流程", "07_25_14_02_daily_end_to_end_flow.md"],
+      ["Monthly 端到端流程", "07_25_14_02_monthly_end_to_end_flow.md"],
+      ["Weekly 端到端流程", "07_25_14_02_weekly_end_to_end_flow.md"],
+      ["EndToEnd 提詞補強建議", "07_25_15_53_end_to_end_prompt_enhancement.md"],
+      ["功能修改與文件同步驗證提詞", "07_25_22_04_feature_change_docs_sync_verification_prompt.md"],
+      ["Plan 文件命名規則", "db_naming.md"]
+    ].map(([title,name]) => ({title,name}));
+    const params = new URLSearchParams(location.search);
+    const requested = params.get("doc") || defaultDocument;
+    const safeDocument = requested.replace(/[\\/]/g, "").trim() || defaultDocument;
+    const content = document.getElementById("content");
+    const nameEl = document.getElementById("documentName");
+    const links = document.getElementById("documentLinks");
+    const shell = document.querySelector(".shell");
+    const sidebarToggle = document.getElementById("sidebarToggle");
+    const catalogUrl = name => `Markdown_Viewer.html?doc=${encodeURIComponent(name)}`;
+    documents.forEach(item => { const link=document.createElement("a"); link.href=catalogUrl(item.name); link.textContent=item.title; links.appendChild(link); });
+    function setName(name){ nameEl.textContent=name; document.title=`${name.replace(/\.md$/i,"")} - Plan Viewer`; }
+    async function renderMarkdown(text,name){ setName(name); content.innerHTML=marked.parse(text,{ mangle:false, headerIds:false }); }
+    async function load(){
+      if(location.protocol === "file:"){ content.innerHTML='<div class="error">請透過本專案 server 開啟 Viewer，才能讀取 plan/ Markdown。</div>'; return; }
+      try { const response=await fetch(`${defaultDirectory}${encodeURIComponent(safeDocument)}`,{cache:"no-store"}); if(!response.ok) throw new Error(`HTTP ${response.status}`); await renderMarkdown(await response.text(),safeDocument); }
+      catch(error){ content.innerHTML=`<div class="error"><strong>無法讀取 ${safeDocument}</strong><br>${String(error.message||error)}</div>`; }
+    }
+    document.getElementById("openMarkdownButton").addEventListener("click",()=>document.getElementById("markdownFile").click());
+    sidebarToggle.addEventListener("click",()=>{ const collapsed=shell.classList.toggle("sidebar-collapsed"); sidebarToggle.setAttribute("aria-expanded",String(!collapsed)); sidebarToggle.setAttribute("aria-label",collapsed?"展開側欄":"收縮側欄"); sidebarToggle.title=collapsed?"展開側欄":"收縮側欄"; });
+    document.getElementById("markdownFile").addEventListener("change",async event=>{ const [file]=event.target.files||[]; if(file) await renderMarkdown(await file.text(),file.name); event.target.value=""; });
+    load();
+  </script>
+</body>
+</html>

@@ -9,7 +9,12 @@
   <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
   <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-chubby/css/uicons-regular-chubby.css">
   <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-bold-straight/css/uicons-bold-straight.css">
-  <link rel="stylesheet" href="daily-calendar.css">
+  <link rel="stylesheet" href="../shared/action-dialogs/module.css">
+  <link rel="stylesheet" href="daily-layout.css">
+  <link rel="stylesheet" href="daily-tasks.css">
+  <link rel="stylesheet" href="daily-account.css">
+  <link rel="stylesheet" href="daily-dialogs.css">
+  <link rel="stylesheet" href="daily-evergreen.css">
 </head>
 <body>
   <main class="daily-board">
@@ -38,7 +43,7 @@
 
       <section class="user-tools">
         <span id="save-status" class="status">-</span>
-        <button class="user-button" id="show-user-name" type="button">
+        <button class="user-button account-user-trigger" id="show-user-name" type="button">
           <span class="btn-word">Hi, 00666888</span>
           <i class="fa-regular fa-user"></i>
         </button>
@@ -119,11 +124,13 @@
       <i class="fa-regular fa-circle-xmark"></i>
     </button>
     <h2>Account</h2>
-    <p>Use 8 digits to switch and remember the calendar account.</p>
-    <input id="textInput" type="text" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="00000000">
+    <div id="counter" class="counter-yellow">Entered 0 / 8 characters</div>
+    <div class="input-box">
+      <input id="textInput" type="text" inputmode="numeric" maxlength="8" pattern="[0-9]{0,8}" autocomplete="off" placeholder=" ">
+      <label class="hint-wording" for="textInput">login-in name</label>
+    </div>
     <div class="dialog-actions">
       <button class="secondary" id="clearUser" type="button">
-        <i class="fa-solid fa-broom"></i>
         <span>Clear</span>
       </button>
       <button class="primary" id="loginUser" type="button">Log-in</button>
@@ -193,6 +200,17 @@
     </div>
   </dialog>
 
+  <script>
+    window.createDailyCalendarWebSocket = function (userId) {
+      const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+      return new WebSocket(`${protocol}://${location.host}/?userId=${encodeURIComponent(userId)}`);
+    };
+  </script>
+  <script src="/runtime-config.js"></script>
+  <script src="daily-account.js"></script>
+  <script src="../shared/action-dialogs/module.js"></script>
+  <script src="daily-tasks.js"></script>
+  <script src="daily-evergreen.js"></script>
   <script src="daily-calendar.js"></script>
 </body>
 </html>

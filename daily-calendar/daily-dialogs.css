@@ -1,0 +1,217 @@
+/* Daily dialog primitives shared by task, evergreen, and account dialogs. */
+.dialog-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: #4b5563;
+  font-size: 22px;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.primary,
+.secondary {
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 9px 12px;
+  font-weight: 900;
+}
+
+.primary {
+  background: #4f46e5;
+  color: #fff;
+}
+
+.secondary {
+  background: transparent;
+  border: 1px solid #d1d5db;
+  color: #1f2937;
+}
+
+/* Account dialog keeps its existing Daily button treatment. */
+.dialog-actions .secondary {
+  background: transparent;
+  border-color: #d1d5db;
+  color: #1f2937;
+}
+
+.dialog-actions .secondary:hover {
+  background: transparent;
+  border-color: #9ca3af;
+}
+
+.dialog-actions .primary {
+  background: #4f46e5;
+  border-color: #4f46e5;
+  color: #fff;
+}
+
+.dialog-actions .primary:hover {
+  background: #4338ca;
+  border-color: #4338ca;
+}
+
+/* Daily account guard: local verification logic with the shared Account visual system. */
+.daily-account-confirm {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: min(440px, calc(100vw - 40px));
+  margin: 0;
+  padding: 18px 13px 10px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, .24);
+}
+.daily-account-confirm .daily-confirm-close {
+  top: 12px;
+  right: 12px;
+  width: auto;
+  height: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #4b5563;
+  font-family: Arial, sans-serif;
+  font-size: 22px;
+  line-height: normal;
+}
+.daily-account-confirm .daily-confirm-close:hover { color: #4f46e5; }
+.daily-account-confirm .daily-confirm-title {
+  margin: 0 0 6px;
+  color: #000;
+  font: 700 24px Poppins, Calibri, Arial, sans-serif;
+}
+.daily-account-confirm .daily-account-progress {
+  margin: 0 0 10px;
+  color: #64748b;
+  font-family: Poppins, Calibri, Arial, sans-serif;
+  font-size: 14px;
+  line-height: normal;
+}
+.daily-account-confirm .counter-yellow { color: #64748b; }
+.daily-account-confirm .counter-green { color: #2563eb; }
+.daily-account-confirm .counter-blue-strong { color: #1d4ed8; font-weight: 800; }
+.daily-account-confirm .counter-red { color: #b7791f; font-weight: 800; }
+.daily-account-confirm .daily-account-field {
+  position: relative;
+  display: block;
+  margin: 7px 0 0;
+}
+.daily-account-confirm .daily-account-input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 45px;
+  padding: 0 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  color: #111827;
+  font: 16px Poppins, Calibri, Arial, sans-serif;
+  outline: none;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.daily-account-confirm .daily-account-input:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, .12);
+}
+.daily-account-confirm .daily-account-input.is-valid {
+  border-color: #1d4ed8;
+  background: #fff;
+}
+.daily-account-confirm .daily-account-input.is-invalid {
+  border-color: #b7791f;
+  background: #fffbeb;
+}
+.daily-account-confirm .daily-account-label {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  font-family: Poppins, Calibri, Arial, sans-serif;
+  pointer-events: none;
+  transition: .2s ease;
+}
+.daily-account-confirm .daily-account-input:focus ~ .daily-account-label,
+.daily-account-confirm .daily-account-input:not(:placeholder-shown) ~ .daily-account-label {
+  top: 0;
+  padding: 0 6px;
+  background: #fff;
+  color: #374151;
+  font-size: .8em;
+}
+.daily-account-confirm .daily-account-field:has(input.is-account-complete)::before {
+  content: "Enter your 8-digit ID";
+  position: absolute;
+  top: 50%;
+  right: 39px;
+  transform: translateY(-50%);
+  padding: 4px 6px;
+  border-radius: 5px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 14px;
+  pointer-events: none;
+}
+.daily-account-confirm .daily-account-field:has(input.is-account-complete)::after {
+  content: "\f2bd";
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  color: #1d4ed8;
+  font-family: "Font Awesome 6 Free";
+  font-size: 18px;
+  font-weight: 900;
+  pointer-events: none;
+}
+.daily-account-confirm .daily-account-error {
+  min-height: 0;
+  margin: 0;
+  color: #b7791f;
+  font: 14px Poppins, Calibri, Arial, sans-serif;
+}
+.daily-account-confirm .daily-confirm-actions {
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 14px;
+}
+.daily-account-confirm .daily-confirm-clear,
+.daily-account-confirm .daily-confirm-ok {
+  min-width: 0;
+  min-height: 0;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font: 900 16px Poppins, Calibri, Arial, sans-serif;
+}
+.daily-account-confirm .daily-confirm-clear {
+  border: 1px solid #d1d5db;
+  background: transparent;
+  color: #1f2937;
+}
+.daily-account-confirm .daily-confirm-clear:hover {
+  border-color: #9ca3af;
+  background: transparent;
+  color: #1f2937;
+}
+.daily-account-confirm .daily-confirm-ok {
+  border: 1px solid #4f46e5;
+  background: #4f46e5;
+  color: #fff;
+}
+.daily-account-confirm .daily-confirm-ok:hover:not(:disabled) {
+  border-color: #4338ca;
+  background: #4338ca;
+}

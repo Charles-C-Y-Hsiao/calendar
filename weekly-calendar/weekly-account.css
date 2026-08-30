@@ -1,0 +1,251 @@
+/* Weekly-owned account presentation.
+ * This file is self-contained; Weekly does not load shared user-account CSS. */
+
+.account-user-trigger {
+  border-radius: 8px;
+  transition: color .2s ease, background-color .2s ease;
+}
+.account-user-trigger:focus-visible { outline: 2px solid #4f46e5; outline-offset: 2px; }
+
+#counter { font-size: 14px; margin-top: 5px; color: #555; }
+#counter.counter-yellow { color: #64748B; }
+#counter.counter-green { color: #2563EB; }
+#counter.counter-blue-strong { color: #1D4ED8; }
+#counter.counter-red { color: #b7791f; }
+#counter.weight { font-weight: 700; }
+
+.user-dialog-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .25);
+  backdrop-filter: blur(2px);
+  z-index: 5;
+}
+
+.user-dialog {
+  display: none;
+  flex-direction: column;
+  width: fit-content;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 10px;
+  overflow: hidden;
+  z-index: 8;
+}
+
+.user-dialog .input-box { position: relative; margin: 7px 0; }
+#textInput {
+  width: min(399px, calc(100vw - 80px));
+  height: 45px;
+  padding: 0 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  outline: none;
+  font-size: 16px;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+#textInput:focus { border-color: transparent; box-shadow: 0 0 0 1px #2b2b2f; }
+.input-box .hint-wording {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  color: #c8c8c8;
+  pointer-events: none;
+  border-radius: 6px;
+  transition: .2s ease;
+}
+.input-box #textInput:focus ~ .hint-wording,
+.input-box #textInput:valid ~ .hint-wording {
+  top: 1px;
+  font-size: .8em;
+  background: #fff;
+  padding: 0 6px;
+  color: #1f293a;
+}
+.input-box:has(#textInput.is-account-complete)::after {
+  content: "\f007";
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  position: absolute;
+  right: 22px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #1D4ED8;
+}
+.input-box:has(#textInput.is-account-complete)::before {
+  content: "Enter your 8-digit ID";
+  position: absolute;
+  right: 39px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #EFF6FF;
+  color: #1D4ED8;
+  padding: 3px 4px;
+  font-size: 14px;
+  border-radius: 5px;
+  white-space: nowrap;
+  z-index: 2;
+}
+
+#dialog-close { width: 100%; display: flex; justify-content: flex-end; height: 22px; font-size: 25px; color: #5f5d6b; }
+#dialog-close-btn { display: grid; align-items: center; border-radius: 50%; }
+#dialog-close-btn:hover { color: #4f46e5; background: transparent; }
+.account-dialog-title { position: absolute; top: 12px; left: 13px; color: #111827; font-size: 24px; font-weight: 700; letter-spacing: .01em; margin: 0; }
+
+.btn {
+  width: fit-content;
+  display: inline-block;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid transparent;
+  padding: .375rem .75rem;
+  font-size: 1rem;
+  border-radius: .25rem;
+  transition: color .15s ease, background-color .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+.btn:focus { outline: none; }
+.btn-primary { color: #fff; background-color: #4f46e5; border-color: #4f46e5; }
+.btn-primary:hover { color: #fff; background-color: #4338ca; border-color: #4338ca; }
+.btn-bright-green { color: #1f2937; background-color: #e5e7eb; border-color: #d1d5db; }
+.btn-bright-green:hover { color: #111827; background-color: #d1d5db; border-color: #9ca3af; }
+.btn-column { display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 6px; padding: 10px 14px; }
+.btn-small-wording { font-size: 16px; font-weight: 600; }
+
+.account-input-warning-dialog {
+  width: min(440px, calc(100vw - 40px));
+  box-sizing: border-box;
+  padding: 18px 13px 10px;
+  border: 0;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, .24);
+  overflow: hidden;
+}
+.account-input-warning-dialog::backdrop { background: rgba(17, 24, 39, .28); }
+.account-input-warning { box-sizing: border-box; padding: 0; background: #fff; font-family: system-ui, sans-serif; }
+.account-input-warning h2 { margin: 0 0 6px; color: #000; font: 700 24px Poppins, Calibri, Arial, sans-serif; }
+.account-input-warning p { margin: 0; color: #64748B; font: 14px Poppins, Calibri, Arial, sans-serif; }
+.account-input-warning-actions { display: flex; justify-content: flex-end; margin-top: 14px; }
+.account-input-warning-close { border: 1px solid #d1d5db; border-radius: 8px; padding: 9px 12px; background: transparent; color: #1f2937; font: 900 16px Poppins, Calibri, Arial, sans-serif; cursor: pointer; }
+.account-input-warning-close:hover { border-color: #9ca3af; }
+
+.weekly-account-dialog {
+  display: flex;
+  flex-direction: column;
+  width: min(440px, calc(100vw - 40px));
+  box-sizing: border-box;
+  padding: 18px 13px 10px;
+  border-radius: 10px;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, .24);
+  background: #fff;
+  position: relative;
+}
+
+.weekly-account-counter-row,
+.weekly-account-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.weekly-account-counter-row {
+  margin: 0 0 10px;
+}
+
+.weekly-account-actions {
+  gap: 8px;
+  margin-top: 14px;
+}
+.weekly-account-actions .secondary {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 9px 12px;
+  background: transparent;
+  color: #1f2937;
+  font: 900 16px Poppins, Calibri, Arial, sans-serif;
+  line-height: normal;
+  cursor: pointer;
+}
+.weekly-account-actions .secondary:hover { border-color: #9ca3af; background: transparent; }
+
+.weekly-account-dialog #dialog-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: auto;
+  height: auto;
+  font-size: 22px;
+}
+.weekly-account-dialog #dialog-close-btn { cursor: pointer; }
+.weekly-account-dialog .account-dialog-title {
+  position: static;
+  margin: 0 0 6px;
+  color: #111827;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.weekly-account-dialog .user_name_popup,
+.user_name_popup {
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  cursor: pointer;
+  color: #333;
+  text-decoration: none;
+  border-radius: 8px;
+}
+
+.weekly-account-dialog .user_name_popup .btn-word,
+.user_name_popup .btn-word {
+  font-size: 15px;
+  font-weight: 900;
+  margin-right: 5px;
+  user-select: none;
+}
+
+.user_name_popup:hover {
+  color: #4f46e5;
+  background: rgba(79, 70, 229, .08);
+}
+
+.weekly-account-dialog .input-box { margin: 7px 0 0; }
+.weekly-account-dialog #textInput {
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 8px;
+  padding: 0 12px;
+  background: #fff;
+  color: #111827;
+}
+.weekly-account-dialog #textInput:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, .12);
+}
+.weekly-account-actions .btn {
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-weight: 900;
+  line-height: normal;
+}
+.weekly-account-actions .btn-bright-green {
+  background: transparent;
+  border-color: #d1d5db;
+  color: #1f2937;
+}
+.weekly-account-actions .btn-bright-green:hover {
+  background: transparent;
+  border-color: #9ca3af;
+}
+.weekly-account-actions .btn-primary {
+  background: #4f46e5;
+  border-color: #4f46e5;
+  color: #fff;
+}

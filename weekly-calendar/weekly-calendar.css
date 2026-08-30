@@ -4,8 +4,26 @@
         border-radius: 14px;
         box-shadow: 0 10px 24px rgba(0,0,0,.05);
         overflow: hidden;
-        height: 100%;
-        width: max-content;
+        height: 690px;
+        min-height: 690px;
+        max-height: 690px;
+        width: min(1060px, calc(100vw - 48px));
+        max-width: 1060px;
+    }
+
+    /* Keep 5px top/bottom breathing room when the 690px board cannot fit. */
+    @media (max-height: 700px) {
+        body {
+            padding: 10px 0 !important;
+            overflow: hidden !important;
+            place-items: start center !important;
+        }
+
+        .board {
+            height: calc(100vh - 20px);
+            min-height: 0;
+            max-height: calc(100vh - 20px);
+        }
     }
 
     /* 頂部標題列 */
@@ -33,9 +51,56 @@
         display: grid;
         grid-template-columns: var(--rulerW) repeat(var(--days), var(--dayWidth));
         /* height: 70vh; */
+        height: calc(100% - var(--headerH));
         overflow: auto;            /* 讓內容可捲動 */
         position: relative;
         min-width: calc(var(--rulerW) + (var(--days) * var(--dayWidth)));
+        scrollbar-color: transparent transparent;
+        scrollbar-width: thin;
+        scrollbar-gutter: stable;
+    }
+
+    /* Reveal content scrollbars on hover/focus, matching Daily's todo-panel. */
+    .content:hover,
+    .content:focus-within {
+        scrollbar-color: rgba(92, 111, 134, .34) transparent;
+    }
+
+    .content::-webkit-scrollbar {
+        width: 14px;
+        height: 14px;
+    }
+
+    .content::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .content::-webkit-scrollbar-thumb {
+        background: transparent;
+        border: 4px solid transparent;
+        border-radius: 999px;
+        background-clip: content-box;
+    }
+
+    .content:hover::-webkit-scrollbar-thumb,
+    .content:focus-within::-webkit-scrollbar-thumb {
+        background-color: rgba(92, 111, 134, .34);
+    }
+
+    .content::-webkit-scrollbar-thumb:hover {
+        background-color: rgba(92, 111, 134, .52);
+    }
+
+    .content::-webkit-scrollbar-button {
+        display: none;
+        width: 0;
+        height: 0;
+    }
+
+    @media (max-height: 700px) {
+        .content {
+            max-height: calc(100vh - 100px);
+        }
     }
 
     /* 左側時間尺 */
@@ -120,6 +185,53 @@
         display: flex;
         flex-direction: column;
         z-index: 1;
+    }
+
+    .block.has-overlap {
+        cursor: pointer;
+        transition: box-shadow .15s ease, filter .15s ease, z-index .15s ease, left .15s ease, width .15s ease, translate .15s ease;
+        translate: 0 var(--hover-shift-y, 0px);
+    }
+
+    .block.has-overlap:hover,
+    .block.has-overlap:focus-visible {
+        z-index: 15;
+        filter: saturate(1.12);
+        box-shadow: 0 8px 22px rgba(30, 41, 59, .24);
+        outline: 2px solid rgba(79, 70, 229, .55);
+        outline-offset: 1px;
+        left: 1px !important;
+        right: 1px !important;
+        width: auto !important;
+    }
+
+    .overlap-details-dialog {
+        width: min(440px, calc(100vw - 32px));
+    }
+
+    .overlap-details-list {
+        display: grid;
+        gap: 8px;
+        list-style: none;
+        margin: 14px 0;
+        padding: 0;
+    }
+
+    .overlap-details-item {
+        align-items: center;
+        background: #f8faff;
+        border: 1px solid #dbe1ee;
+        border-radius: 8px;
+        display: flex;
+        gap: 12px;
+        justify-content: space-between;
+        padding: 9px 10px;
+    }
+
+    .overlap-details-item strong {
+        color: #374151;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
     }
 
     .block.is-dragging,
@@ -283,6 +395,8 @@
         font-size: 14px;
         overflow-y: auto;
         overflow-x: hidden;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
     }
 
     .block .text::-webkit-scrollbar-track  {
@@ -291,9 +405,7 @@
         border: 1px solid #999;
         border-radius: 20px;
     }
-    /* .block .text::-webkit-scrollbar  {width: 0;} */
-    .block .text::-webkit-scrollbar  {width: 7px;}
-    .block .text:hover::-webkit-scrollbar  {width: 7px;}
+    .block .text::-webkit-scrollbar  {width: 0; height: 0;}
     .block .text::-webkit-scrollbar-thumb  {
         background: #8B8B8B;
         border-radius: 20px;
@@ -323,6 +435,9 @@
         position: relative;
         min-height: 42px;
         width: 100%;
+        min-width: 0;
+        overflow: hidden;
+        white-space: nowrap;
     }
     /* 月曆連結靠左 */
     .month-link {
@@ -374,37 +489,23 @@
         align-items: center;
         /* gap: 8px; */
     }
-    .user_name_popup {
-        font-size: 20px;
-        display: flex;
-        align-items: center;
-        padding: 4px 8px;
-        cursor: pointer;
-        color: #333;
-        text-decoration: none;
-    }
-    .user_name_popup .btn-word {
-        font-size: 15px;
-        font-weight: 900;
-        margin-right: 5px;
-        user-select: none;
-    }
-    .user_name_popup:hover {
-        color: #4f46e5; /* hover 效果（可調整） */
-    }
-
-    .month-link,
-    .user_name_popup {
+    .month-link {
         border-radius: 8px;
     }
-    .month-link:hover,
-    .user_name_popup:hover {
+    .month-link:hover {
         color: #4f46e5;
         background: rgba(79, 70, 229, .08);
     }
 
     .weekbar .btn-dir{ border:0; background:transparent; cursor:pointer; width:28px; height:28px; padding:0; }
     .weekbar .range{ font-weight:600; color:#374151; }
+
+    /* Keep the week header on one line; remove the right login tools first on narrow viewports. */
+    @media (max-width: 1100px) {
+        .weekbar .weekbar-user-tools {
+            display: none;
+        }
+    }
 
     /* topbar 每天顯示「日期 + 星期」 */
     .topbar .cell .date{ display:block; font-weight:700; }

@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>User Account Module Preview</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
+  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-chubby/css/uicons-regular-chubby.css">
+  <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/3.0.0/uicons-bold-straight/css/uicons-bold-straight.css">
+  <link rel="stylesheet" href="module.css">
+</head>
+<body>
+  <main class="user-account-module">
+    <button type="button" class="account-user-trigger" id="show-user-name"><span class="btn-word">Hi, 00000009</span><i class="fa-regular fa-user" aria-hidden="true"></i></button>
+    <dialog class="user-dialog" id="userDialog" aria-labelledby="userAccountTitle">
+      <button type="button" class="dialog-close" id="dialogClose" aria-label="Close"><i class="fa-regular fa-circle-xmark" aria-hidden="true"></i></button>
+      <h2 id="userAccountTitle">Account</h2>
+      <div class="counter counter-yellow">Entered 0 / 8 characters</div>
+      <div class="input-box">
+        <input id="textInput" type="text" inputmode="numeric" maxlength="8" placeholder=" ">
+        <label class="hint-wording" for="textInput">login-in name</label>
+      </div>
+      <div class="actions"><button type="button" class="clear">Clear</button><button type="button" class="login">Log-in</button></div>
+    </dialog>
+    <dialog class="account-warning" id="userAccountWarning" aria-labelledby="warningTitle">
+      <h3 id="warningTitle">Invalid input</h3><p>Please enter exactly 8 digits (0–9).</p>
+      <div class="warning-actions"><button type="button" id="warningClose" class="clear">Close</button></div>
+    </dialog>
+  </main>
+  <script>window.onUserAccountLogin = id => { const trigger = document.getElementById('show-user-name'); const label = trigger.querySelector('.btn-word'); if (label) label.textContent = `Hi, ${id}`; };</script>
+  <script src="module.js"></script>
+</body>
+</html>

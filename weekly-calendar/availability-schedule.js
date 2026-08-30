@@ -31,9 +31,12 @@
   }
 
   function managerWeeks() {
+    // The manager is opened from the currently visible week.  Show that week
+    // first so its loaded availability records are immediately discoverable;
+    // surrounding weeks remain available by scrolling.
     return [
-      { offset: -1, title: 'Previous week' },
       { offset: 0, title: 'This week' },
+      { offset: -1, title: 'Previous week' },
       { offset: 1, title: 'Next week' },
       { offset: 2, title: 'Two weeks later' }
     ].map(week => ({
@@ -364,7 +367,7 @@
     deleteGroupBtn.addEventListener('click', async () => {
       const groupId = block.dataset.availabilityGroupId;
       if (!groupId) return;
-      if (!confirm('Delete this availability group from all matching dates?')) return;
+      if (!(await window.actionDialogs.confirm({ title: 'Delete availability group?', message: 'Delete this availability group from all matching dates?', okText: 'Delete', cancelText: 'Cancel', danger: true }))) return;
       try {
         setStatus('儲存中...', 'saving');
         const nextSchedules = cloneScheduleMap(await loadFullSchedule());
@@ -376,7 +379,7 @@
         close();
       } catch (error) {
         setStatus('儲存失敗：' + error.message, 'error');
-        alert(error.message);
+        await window.actionDialogs.alert(error.message, { title: 'Availability error' });
       }
     });
 
@@ -390,15 +393,15 @@
         .filter(day => Number.isInteger(day));
 
       if (nextTo < nextFrom) {
-        alert('End date must be after start date.');
+        await window.actionDialogs.alert('End date must be after start date.', { title: 'Invalid availability' });
         return;
       }
       if (hhmmToMinutes(nextEnd) <= hhmmToMinutes(nextStart)) {
-        alert('End time must be after start time.');
+        await window.actionDialogs.alert('End time must be after start time.', { title: 'Invalid availability' });
         return;
       }
       if (!selectedWeekdays.length) {
-        alert('Select at least one weekday.');
+        await window.actionDialogs.alert('Select at least one weekday.', { title: 'Invalid availability' });
         return;
       }
 
@@ -407,7 +410,7 @@
       const targetDates = availabilityDatesInRange(nextFrom, nextTo, selectedWeekdays);
 
       if (!targetDates.length) {
-        alert('No matching dates in the selected range.');
+        await window.actionDialogs.alert('No matching dates in the selected range.', { title: 'Invalid availability' });
         return;
       }
 
@@ -435,7 +438,7 @@
         close();
       } catch (error) {
         setStatus('儲存失敗：' + error.message, 'error');
-        alert(error.message);
+        await window.actionDialogs.alert(error.message, { title: 'Availability error' });
       }
     });
   }
@@ -470,19 +473,39 @@
   }
 
   function annotateOverlap(items) {
-    const activeEnds = [];
-    return items.map(item => {
-      const start = hhmmToMinutes(item.start_time);
-      const end = hhmmToMinutes(item.end_time);
-      let level = activeEnds.findIndex(activeEnd => activeEnd <= start);
-      if (level === -1) {
-        level = activeEnds.length;
-        activeEnds.push(end);
-      } else {
-        activeEnds[level] = end;
-      }
-      return { item, level, isOverlap: activeEnds.length > 1 };
+    const sorted = items.map((item, index) => ({ item, index }))
+      .sort((a, b) => hhmmToMinutes(a.item.start_time) - hhmmToMinutes(b.item.start_time) || a.index - b.index);
+    const result = [];
+    let group = [];
+    let groupEnd = -1;
+    const flush = () => {
+      if (!group.length) return;
+      const lanes = [];
+      group.forEach(entry => {
+        const start = hhmmToMinutes(entry.item.start_time);
+        let lane = lanes.findIndex(end => end <= start);
+        if (lane < 0) lane = lanes.length;
+        lanes[lane] = hhmmToMinutes(entry.item.end_time);
+        result.push({ item: entry.item, index: entry.index, lane, laneCount: lanes.length, isOverlap: group.length > 1 });
+      });
+      // All records in a connected overlap group share the final lane count.
+      const laneCount = lanes.length;
+      result.slice(-group.length).forEach(entry => {
+        entry.laneCount = laneCount;
+        entry.isOverlap = group.length > 1;
+      });
+      group = [];
+      groupEnd = -1;
+    };
+    sorted.forEach(entry => {
+      const start = hhmmToMinutes(entry.item.start_time);
+      const end = hhmmToMinutes(entry.item.end_time);
+      if (group.length && start >= groupEnd) flush();
+      group.push(entry);
+      groupEnd = Math.max(groupEnd, end);
     });
+    flush();
+    return result.sort((a, b) => a.index - b.index);
   }
 
   function managerTimeSegments(week) {
@@ -656,14 +679,15 @@
         if (!items.length) {
           lane.classList.add('is-empty');
         } else {
-        annotateOverlap(items).forEach(({ item, level, isOverlap }) => {
+        annotateOverlap(items).forEach(({ item, lane: laneIndex, laneCount, isOverlap }) => {
           const row = document.createElement('button');
           row.type = 'button';
           row.className = `availability-record${isOverlap ? ' is-overlap' : ''}`;
           const { top, height } = managerRecordMetrics(item, timeSegments);
           row.style.setProperty('--record-top', `${top}px`);
           row.style.setProperty('--record-height', `${height}px`);
-          row.style.setProperty('--overlap-level', String(Math.min(level, 3)));
+          row.style.setProperty('--overlap-lane', String(laneIndex));
+          row.style.setProperty('--overlap-lanes', String(laneCount));
           const people = parsePeopleFromData(item.availabilityPeople);
           const chips = people.map(person => {
             const status = STATUS[person.status] || STATUS.free;

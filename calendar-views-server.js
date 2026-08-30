@@ -12,6 +12,11 @@
   const WEEK_DIR = path.join(__dirname, 'weekly-calendar');
   const MONTH_DIR = path.join(__dirname, 'monthly-calendar');
   const DAILY_DIR = path.join(__dirname, 'daily-calendar');
+  const SHARED_DIR = path.join(__dirname, 'shared');
+  const PLAN_DIR = path.join(__dirname, 'plan');
+  // Edit-mode confirmation is configured when this server starts. Restart after changing either value.
+  const EDIT_MODE_AUTO_CONFIRM = true;
+  const EDIT_MODE_AUTO_CONFIRM_SECONDS = 1; // The browser accepts whole seconds from 1 to 5; invalid values fall back to 2.
   // console.log("[MONTH_DIR] =", MONTH_DIR);
 
   // ★ 每個使用者一個 json 檔：資料目錄
@@ -98,8 +103,15 @@
   app.use('/week', express.static(WEEK_DIR));
   // 讓 /month/... 對應到 meeting_calendar_v5
   app.use('/month', express.static(MONTH_DIR));
+  app.use('/shared', express.static(SHARED_DIR));
+  app.use('/plan', express.static(PLAN_DIR));
   app.use('/daily-calendar', express.static(DAILY_DIR));
   app.use('/day', express.static(DAILY_DIR));
+  app.get('/runtime-config.js', (req, res) => {
+    res.type('application/javascript');
+    res.set('Cache-Control', 'no-store');
+    res.send(`window.calendarRuntimeConfig = Object.freeze({ editModeAutoConfirm: Object.freeze({ enabled: ${JSON.stringify(EDIT_MODE_AUTO_CONFIRM)}, seconds: ${JSON.stringify(EDIT_MODE_AUTO_CONFIRM_SECONDS)} }) });`);
+  });
   app.get('/', (req, res) => {
     res.redirect('/week');
   });

@@ -40,8 +40,8 @@
 | `weekly-calendar/recurring-schedule.js` | 批次週期事件主程式 | 建立管理視窗、讀取表單、產生日期、寫入完整 schedule、修改/刪除批次組 |
 | `weekly-calendar/recurring-schedule.css` | 批次管理 UI 樣式 | 管理按鈕、彈窗、日期/星期選擇、已建立群組列表 |
 | `weekly-calendar/weekly-calendar-core.js` | 週曆核心 | 建立 block、渲染 block、序列化每日資料、保留 repeat metadata、顯示固定任務 icon |
-| `weekly-calendar/setupElements.js` | 儲存與載入週資料 | `persistDay()`、`persistWeek()`、`loadWeek()`，保存 repeat metadata |
-| `weekly-calendar/interact-drag-resize.js` | 拖曳與 resize | 移動 block 時保留 repeat metadata |
+| `weekly-calendar/weekly-persistence.js` | 儲存與載入週資料 | `persistDay()`、`persistWeek()`、`loadWeek()`，保存 repeat metadata |
+| `weekly-calendar/weekly-block-interaction.js` | 拖曳與 resize | 移動 block 時保留 repeat metadata |
 | `calendar-views-server.js` | HTTP / WS server | 提供 `/schedule`、`/schedule/:date`、`/calendar`，將資料寫入 `data/<user>.json` 並廣播更新 |
 | `data/<userId>.json` | 使用者資料 | 真正存放日期對應的 schedule map |
 
@@ -128,9 +128,9 @@ flowchart TD
 | --- | --- | --- |
 | `ensureFullScheduleLoaded(messageEl)` | `weekly-calendar/recurring-schedule.js` | `GET /schedule` 取得完整使用者 schedule |
 | `postFullSchedule(scheduleMap)` | `weekly-calendar/recurring-schedule.js` | `POST /calendar` 寫回完整 schedule map |
-| `renderWeekFromMap(startDate, setupInteract, allSchedules, getDayCols)` | `weekly-calendar/setupElements.js` | 用最新 `allSchedules` 重畫目前週 |
+| `renderWeekFromMap(startDate, setupInteract, allSchedules, getDayCols)` | `weekly-calendar/weekly-persistence.js` | 用最新 `allSchedules` 重畫目前週 |
 | `serializeDay(dayIndex)` | `weekly-calendar/weekly-calendar-core.js` | 將 DOM block 轉回 JSON，包含 repeat metadata |
-| `buildPayloadForDate(dateStr)` | `weekly-calendar/setupElements.js` | 從 `allSchedules[dateStr]` 建立單日保存 payload，包含 repeat metadata |
+| `buildPayloadForDate(dateStr)` | `weekly-calendar/weekly-persistence.js` | 從 `allSchedules[dateStr]` 建立單日保存 payload，包含 repeat metadata |
 
 ## 資料流
 
@@ -217,8 +217,8 @@ window.openRecurringScheduleDialog({
 | 檔案 | 保留位置 |
 | --- | --- |
 | `weekly-calendar/weekly-calendar-core.js` | `serializeDay()`、`renderDayFromData()`、`createBlockElement()` |
-| `weekly-calendar/setupElements.js` | `buildPayloadForDate()` |
-| `weekly-calendar/interact-drag-resize.js` | block 移動日期時建立 `movedItem` |
+| `weekly-calendar/weekly-persistence.js` | `buildPayloadForDate()` |
+| `weekly-calendar/weekly-block-interaction.js` | block 移動日期時建立 `movedItem` |
 
 ## Server API
 
@@ -256,8 +256,8 @@ window.openRecurringScheduleDialog({
 
 1. `node --check weekly-calendar/recurring-schedule.js`
 2. `node --check weekly-calendar/weekly-calendar-core.js`
-3. `node --check weekly-calendar/setupElements.js`
-4. `node --check weekly-calendar/interact-drag-resize.js`
+3. `node --check weekly-calendar/weekly-persistence.js`
+4. `node --check weekly-calendar/weekly-block-interaction.js`
 5. 開啟 `http://localhost:3011/week/`
 6. 點擊右上角批次按鈕
 7. 測試每週模式：MON-FRI 是否正確生成

@@ -1,0 +1,281 @@
+/* Daily Evergreen list and editor styles. */
+
+.evergreen-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 18px;
+}
+
+.evergreen-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: #374151;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.evergreen-tools {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 18px;
+}
+
+.evergreen-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin: 0;
+  padding: 0 4px 0 0;
+  height: auto;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+  scrollbar-color: transparent transparent;
+  scrollbar-width: thin;
+}
+
+.evergreen-list::-webkit-scrollbar {
+  width: 14px;
+}
+
+.evergreen-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.evergreen-list::-webkit-scrollbar-thumb {
+  background: transparent;
+  border: 4px solid transparent;
+  border-radius: 999px;
+  background-clip: content-box;
+}
+
+.evergreen-list:hover {
+  scrollbar-color: rgba(92, 111, 134, .34) transparent;
+}
+
+.evergreen-list:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(92, 111, 134, .34);
+}
+
+.evergreen-list::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(92, 111, 134, .52);
+}
+
+.evergreen-list::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.evergreen-item {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  border: 1px solid #dbe1ee;
+  border-radius: 8px;
+  background: #fffdf5;
+  padding: 8px 10px;
+  transition: background .15s ease, border-color .15s ease, opacity .15s ease;
+  cursor: pointer;
+}
+
+.evergreen-item:hover {
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+
+.evergreen-item.is-dragging {
+  opacity: .45;
+}
+
+.evergreen-item.is-drop-target {
+  border-color: #4f46e5;
+  box-shadow: inset 0 0 0 2px rgba(79, 70, 229, .18);
+}
+
+.evergreen-item.is-done {
+  background: #f3f4f6;
+  color: #6b7280;
+  opacity: .8;
+}
+
+.evergreen-item.is-archived {
+  display: none;
+}
+
+.evergreen-check {
+  display: none;
+  width: 18px;
+  height: 18px;
+  accent-color: #6b7280;
+}
+
+.evergreen-drag {
+  opacity: .66;
+  cursor: grab;
+}
+
+.evergreen-drag:active {
+  cursor: grabbing;
+}
+
+.evergreen-main {
+  min-width: 0;
+}
+
+.evergreen-title {
+  display: block;
+  overflow-wrap: anywhere;
+  color: #111827;
+  font-weight: 800;
+}
+
+.evergreen-item.is-done .evergreen-title {
+  color: #6b7280;
+  text-decoration: line-through;
+}
+
+.evergreen-meta {
+  display: none;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 3px;
+}
+
+.evergreen-chip {
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #4b5563;
+  padding: 2px 7px;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.evergreen-chip.priority-high {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.evergreen-chip.priority-medium {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.evergreen-chip.priority-low {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.evergreen-actions {
+  display: none;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+}
+
+.evergreen-actions button {
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  font-size: 17px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .15s ease, visibility .15s ease, background .15s ease, color .15s ease;
+}
+
+.evergreen-actions button:hover {
+  background: rgba(79, 70, 229, .10);
+  color: #4f46e5;
+}
+
+.evergreen-actions .evergreen-delete:hover {
+  background: rgba(239, 68, 68, .12);
+  color: #dc2626;
+}
+
+.long-term-edit-mode .evergreen-check {
+  display: block;
+}
+
+.long-term-edit-mode .evergreen-drag {
+  display: none;
+}
+
+.long-term-edit-mode .evergreen-actions {
+  display: inline-flex;
+}
+
+.long-term-edit-mode .evergreen-item:hover .evergreen-actions button,
+.long-term-edit-mode .evergreen-item:focus-within .evergreen-actions button {
+  opacity: 1;
+  visibility: visible;
+}
+
+@media (hover: none) {
+  .long-term-edit-mode .evergreen-actions button {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.evergreen-empty {
+  display: none;
+  min-height: 42px;
+  align-items: center;
+  color: #9ca3af;
+  font-weight: 800;
+}
+
+.evergreen-empty.is-visible {
+  display: flex;
+}
+
+
+.evergreen-edit-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.evergreen-edit-grid label:first-child {
+  grid-column: 1 / -1;
+}
+
+.evergreen-edit-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.evergreen-edit-grid input,
+.evergreen-edit-grid select {
+  min-height: 40px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 8px 10px;
+  outline: none;
+}
+
+.evergreen-edit-grid input:focus,
+.evergreen-edit-grid select:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, .12);
+}
+

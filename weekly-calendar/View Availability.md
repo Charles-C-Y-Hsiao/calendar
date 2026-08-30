@@ -56,8 +56,8 @@ Availability block 是週曆 block 的一種特殊類型，會多帶以下 metad
 | `weekly-calendar/availability-schedule.js` | Availability 主程式 | 建立管理面板、建立/編輯 availability block、渲染 chip、過濾日期區間與星期 |
 | `weekly-calendar/availability-schedule.css` | Availability UI 樣式 | availability block、chip、editor、管理面板、壓縮時間軸與 scrollbar |
 | `weekly-calendar/weekly-calendar-core.js` | 週曆核心 | 建立 block、渲染 block、序列化每日資料、保留 availability metadata |
-| `weekly-calendar/setupElements.js` | 儲存與載入週資料 | `persistDay()`、`persistWeek()`、`loadWeek()`，保存 availability metadata |
-| `weekly-calendar/interact-drag-resize.js` | 拖曳與 resize | 移動 availability block 時保留 metadata |
+| `weekly-calendar/weekly-persistence.js` | 儲存與載入週資料 | `persistDay()`、`persistWeek()`、`loadWeek()`，保存 availability metadata |
+| `weekly-calendar/weekly-block-interaction.js` | 拖曳與 resize | 移動 availability block 時保留 metadata |
 | `calendar-views-server.js` | HTTP / WS server | 提供 `/schedule`、`/schedule/:date`、`/calendar`，將資料寫入 `data/<user>.json` 並廣播更新 |
 | `data/<userId>.json` | 使用者資料 | 真正存放日期對應的 schedule map |
 
@@ -148,9 +148,9 @@ flowchart TD
 | --- | --- | --- |
 | `serializeDay(dayIndex)` | `weekly-calendar/weekly-calendar-core.js` | 將 DOM block 轉 JSON，包含 availability metadata |
 | `renderDayFromData(dayIndex, items, setupInteract)` | `weekly-calendar/weekly-calendar-core.js` | 從後端資料重建 block，包含 availability metadata |
-| `buildPayloadForDate(dateStr)` | `weekly-calendar/setupElements.js` | 從 `allSchedules[dateStr]` 建立單日保存 payload，包含 availability metadata |
-| `persistWeek()` | `weekly-calendar/setupElements.js` | 保存目前週，editor 儲存 availability 後使用 |
-| moved item 建立流程 | `weekly-calendar/interact-drag-resize.js` | block 拖曳到其他日期時保留 availability metadata |
+| `buildPayloadForDate(dateStr)` | `weekly-calendar/weekly-persistence.js` | 從 `allSchedules[dateStr]` 建立單日保存 payload，包含 availability metadata |
+| `persistWeek()` | `weekly-calendar/weekly-persistence.js` | 保存目前週，editor 儲存 availability 後使用 |
+| moved item 建立流程 | `weekly-calendar/weekly-block-interaction.js` | block 拖曳到其他日期時保留 availability metadata |
 
 ## 資料流
 
@@ -236,8 +236,8 @@ flowchart TD
 | 檔案 | 保存位置 |
 | --- | --- |
 | `weekly-calendar/weekly-calendar-core.js` | `serializeDay()`、`renderDayFromData()`、`createBlockElement()` |
-| `weekly-calendar/setupElements.js` | `buildPayloadForDate()` |
-| `weekly-calendar/interact-drag-resize.js` | block 移動日期時建立 `movedItem` |
+| `weekly-calendar/weekly-persistence.js` | `buildPayloadForDate()` |
+| `weekly-calendar/weekly-block-interaction.js` | block 移動日期時建立 `movedItem` |
 
 ## Server API
 
@@ -275,8 +275,8 @@ Availability 通常只關心幾段時間，例如 `08:30-09:30`、`16:30-17:30`�
 
 1. `node --check weekly-calendar/availability-schedule.js`
 2. `node --check weekly-calendar/weekly-calendar-core.js`
-3. `node --check weekly-calendar/setupElements.js`
-4. `node --check weekly-calendar/interact-drag-resize.js`
+3. `node --check weekly-calendar/weekly-persistence.js`
+4. `node --check weekly-calendar/weekly-block-interaction.js`
 5. 開啟 `http://localhost:3011/week/`
 6. 點擊右上角 availability icon
 7. 在本週某天按 `+` 建立 availability

@@ -91,7 +91,9 @@
         // 清空這天既有 block（保留 dayEl）
         dayEl.querySelectorAll('.block').forEach(n => n.remove());
 
-        for (const itm of items) {
+        const laidOutItems = layoutOverlappingItems(items);
+        for (const layout of laidOutItems) {
+        const itm = layout.item;
         const { topPx, hPx } = topHeightFromTimes(itm.start_time, itm.end_time);
         const block = createBlockElement({
             top: topPx,
@@ -112,10 +114,60 @@
             availabilityPeople: Array.isArray(itm.availabilityPeople) ? itm.availabilityPeople : [],
             completed: Boolean(itm.completed)
         });
+        block.style.setProperty('--overlap-lane', String(layout.lane));
+        block.style.setProperty('--overlap-lanes', String(layout.laneCount));
+        block.dataset.overlapCount = String(layout.group.length);
+        block._overlapItems = layout.group;
+        if (layout.group.length > 1) {
+            const laneWidth = 100 / layout.laneCount;
+            block.classList.add('has-overlap');
+            block.tabIndex = 0;
+            block.style.left = `calc(${laneWidth * layout.lane}% + 1px)`;
+            block.style.width = `calc(${laneWidth}% - 2px)`;
+            block.style.right = 'auto';
+        }
         dayEl.appendChild(block);
         setupInteract(block);
         updateBlockTime(block);
         }
+    }
+
+    function layoutOverlappingItems(items) {
+        const sorted = items.map((item, index) => ({ item, index }))
+            .sort((a, b) => hhmmToMinutes(a.item.start_time) - hhmmToMinutes(b.item.start_time));
+        const result = [];
+        let group = [];
+        let groupEnd = -1;
+        const flush = () => {
+            if (!group.length) return;
+            const lanes = [];
+            group.forEach(entry => {
+                const start = hhmmToMinutes(entry.item.start_time);
+                let lane = lanes.findIndex(end => end <= start);
+                if (lane < 0) lane = lanes.length;
+                lanes[lane] = hhmmToMinutes(entry.item.end_time);
+                entry.lane = lane;
+            });
+            const groupItems = group.map(entry => entry.item);
+            group.forEach(entry => result.push({
+                item: entry.item,
+                lane: entry.lane,
+                laneCount: lanes.length,
+                group: groupItems
+            }));
+            group = [];
+            groupEnd = -1;
+        };
+
+        sorted.forEach(entry => {
+            const start = hhmmToMinutes(entry.item.start_time);
+            const end = hhmmToMinutes(entry.item.end_time);
+            if (group.length && start >= groupEnd) flush();
+            group.push(entry);
+            groupEnd = Math.max(groupEnd, end);
+        });
+        flush();
+        return result.sort((a, b) => a.item.start_time.localeCompare(b.item.start_time) || a.item.id.localeCompare(b.item.id));
     }
 
     // ===== 計算顯示時間（依欄內 top/height -> HH:mm ~ HH:mm） =====
@@ -466,11 +518,78 @@
         if (block.dataset.itemType === 'availability' && typeof window.attachAvailabilityBlockEditor === 'function') {
             window.attachAvailabilityBlockEditor(block);
         }
-        attachTimeEditor(block); //at interact-drag-resize.js
+        block.addEventListener('click', event => {
+            if (Number(block.dataset.overlapCount || 0) < 2) return;
+            if (event.target.closest('button, .text, .handle')) return;
+            openOverlapDetails(block);
+        });
+        block.addEventListener('keydown', event => {
+            if ((event.key !== 'Enter' && event.key !== ' ') || Number(block.dataset.overlapCount || 0) < 2) return;
+            if (event.target !== block) return;
+            event.preventDefault();
+            openOverlapDetails(block);
+        });
+        block.addEventListener('mouseenter', () => {
+            if (Number(block.dataset.overlapCount || 0) < 2) return;
+            const topbar = document.querySelector('.topbar');
+            if (!topbar) return;
+            const gap = 4;
+            const overlap = topbar.getBoundingClientRect().bottom + gap - block.getBoundingClientRect().top;
+            block.style.setProperty('--hover-shift-y', `${Math.max(0, overlap)}px`);
+        });
+        block.addEventListener('mouseleave', () => {
+            block.style.setProperty('--hover-shift-y', '0px');
+        });
+        attachTimeEditor(block); //at weekly-block-interaction.js
         return block;
     }
 
+    function openOverlapDetails(block) {
+        const items = Array.isArray(block._overlapItems) ? block._overlapItems : [];
+        if (items.length < 2) return;
+        document.querySelectorAll('.overlap-details-overlay').forEach(el => el.remove());
+
+        const overlay = document.createElement('div');
+        overlay.className = 'dt-dialog-overlay overlap-details-overlay';
+        const dialog = document.createElement('div');
+        dialog.className = 'dt-dialog overlap-details-dialog';
+        const title = document.createElement('div');
+        title.className = 'dt-dialog-title';
+        title.textContent = `${items.length} overlapping tasks`;
+        const list = document.createElement('ul');
+        list.className = 'overlap-details-list';
+        items.forEach(item => {
+            const row = document.createElement('li');
+            row.className = 'overlap-details-item';
+            const time = document.createElement('strong');
+            time.textContent = `${item.start_time || '--:--'} ~ ${item.end_time || '--:--'}`;
+            const name = document.createElement('span');
+            name.textContent = item.text || (item.type === 'availability' ? 'Availability' : '(untitled)');
+            row.append(time, name);
+            list.appendChild(row);
+        });
+        const actions = document.createElement('div');
+        actions.className = 'dt-dialog-actions';
+        const closeButton = document.createElement('button');
+        closeButton.type = 'button';
+        closeButton.className = 'dt-ok';
+        closeButton.textContent = 'Close';
+        actions.appendChild(closeButton);
+        dialog.append(title, list, actions);
+        overlay.appendChild(dialog);
+        document.body.appendChild(overlay);
+        const close = () => overlay.remove();
+        closeButton.addEventListener('click', close);
+        overlay.addEventListener('click', event => {
+            if (event.target === overlay) close();
+        });
+    }
+
     function showQuickSaveDialog(title, message) {
+        if (window.actionDialogs?.alert) {
+            window.actionDialogs.alert(message, { title, okText: 'Close', timeoutMs: 2200 });
+            return;
+        }
         document.querySelectorAll('.quick-save-dialog-overlay').forEach(el => el.remove());
 
         const overlay = document.createElement('div');
@@ -498,6 +617,9 @@
     }
 
     function openDeleteConfirmDialog({ title, message }) {
+        if (window.actionDialogs?.confirm) {
+            return window.actionDialogs.confirm({ title, message, okText: 'Confirm', cancelText: 'Cancel', danger: true });
+        }
         return new Promise(resolve => {
             document.querySelectorAll('.delete-confirm-dialog-overlay').forEach(el => el.remove());
 

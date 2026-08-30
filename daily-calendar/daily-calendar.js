@@ -1,4 +1,3 @@
-const CALENDAR_USER_STORAGE_KEY = 'calendar.currentUserId';
 const DAILY_CLIENT_ID = `daily-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 const DEFAULT_USER_ID = '00666888';
 
@@ -16,6 +15,7 @@ let todoPointerDrag = null;
 let evergreenPointerDrag = null;
 let isEditMode = false;
 let isEvergreenEditMode = false;
+window.dailyUserId = userId;
 
 const els = {
   weekLink: document.getElementById('weekLink'),
@@ -145,6 +145,7 @@ function bindEvents() {
       title: 'Enter edit mode?',
       message: 'Edit mode shows batch delete and drag controls for this day.',
       okText: 'Enter',
+      autoConfirm: window.calendarRuntimeConfig?.editModeAutoConfirm,
     });
     if (ok) setEditMode(true);
   });
@@ -166,18 +167,6 @@ function bindEvents() {
     await saveCurrentDay();
   });
 
-  els.userButton.addEventListener('click', openUserDialog);
-  els.overlay.addEventListener('click', closeUserDialog);
-  els.closeDialog.addEventListener('click', closeUserDialog);
-  els.clearUser.addEventListener('click', () => {
-    els.userInput.value = '';
-    els.userInput.focus();
-  });
-  els.loginUser.addEventListener('click', applyUserIdFromDialog);
-  els.userInput.addEventListener('keydown', event => {
-    if (event.key === 'Enter') applyUserIdFromDialog();
-    if (event.key === 'Escape') closeUserDialog();
-  });
   els.taskEditClose.addEventListener('click', closeTaskEditor);
   els.taskEditCancel.addEventListener('click', closeTaskEditor);
   els.taskEditSave.addEventListener('click', saveTaskEditor);
@@ -201,578 +190,11 @@ function bindEvents() {
   });
 }
 
-function renderEvergreen() {
-  const visibleItems = evergreenItems.filter(item => item.status !== 'archived');
 
-  els.evergreenList.innerHTML = visibleItems.map(item => {
-    const done = item.status === 'done' || item.completed;
-    const priority = normalizePriority(item.priority);
-    const status = normalizeEvergreenStatus(item.status, item.completed);
-    return `
-      <li class="evergreen-item ${done ? 'is-done' : ''} ${status === 'archived' ? 'is-archived' : ''}" data-id="${escapeHtml(item.id)}">
-        <button class="evergreen-drag row-action" type="button" title="Move">
-          <i class="fa-solid fa-grip-vertical"></i>
-        </button>
-        <input class="evergreen-check" type="checkbox" title="Done" ${done ? 'checked' : ''}>
-        <span class="evergreen-main">
-          <span class="evergreen-title">${escapeHtml(item.text || '')}</span>
-          <span class="evergreen-meta">
-            <span class="evergreen-chip priority-${escapeHtml(priority)}">${escapeHtml(priority)}</span>
-            <span class="evergreen-chip">${escapeHtml(status)}</span>
-          </span>
-        </span>
-        <span class="evergreen-actions">
-          <button class="evergreen-schedule" type="button" title="Schedule today">
-            <i class="fa-regular fa-calendar-plus"></i>
-          </button>
-          <button class="evergreen-edit" type="button" title="Edit">
-            <i class="fa-regular fa-pen-to-square"></i>
-          </button>
-          <button class="evergreen-delete" type="button" title="Archive">
-            <i class="fa fa-times"></i>
-          </button>
-        </span>
-      </li>
-    `;
-  }).join('');
-
-  els.evergreenEmpty.classList.toggle('is-visible', visibleItems.length === 0);
-
-  els.evergreenList.querySelectorAll('.evergreen-item').forEach(row => {
-    const id = row.dataset.id;
-    row.querySelector('.evergreen-check').addEventListener('change', async event => {
-      if (!isEvergreenEditMode) return;
-      const item = evergreenItems.find(entry => entry.id === id);
-      if (!item) return;
-      item.completed = event.target.checked;
-      item.status = event.target.checked ? 'done' : 'active';
-      renderEvergreen();
-      await saveEvergreen();
-    });
-    row.querySelector('.evergreen-schedule').addEventListener('click', async () => {
-      if (!isEvergreenEditMode) return;
-      await scheduleEvergreenToday(id);
-    });
-    row.querySelector('.evergreen-edit').addEventListener('click', () => {
-      if (!isEvergreenEditMode) return;
-      openEvergreenEditor(id);
-    });
-    row.querySelector('.evergreen-delete').addEventListener('click', async () => {
-      if (!isEvergreenEditMode) return;
-      const item = evergreenItems.find(entry => entry.id === id);
-      if (!item) return;
-      item.status = 'archived';
-      renderEvergreen();
-      await saveEvergreen();
-    });
-    const dragBtn = row.querySelector('.evergreen-drag');
-    dragBtn.addEventListener('pointerdown', event => {
-      event.stopPropagation();
-      if (isEvergreenEditMode) return;
-      beginEvergreenPointerDrag(event, id, row);
-    });
-    dragBtn.addEventListener('click', event => event.stopPropagation());
-    row.addEventListener('dragstart', event => {
-      if (isEvergreenEditMode) {
-        event.preventDefault();
-        return;
-      }
-      draggingEvergreenId = id;
-      row.classList.add('is-dragging');
-      event.dataTransfer.effectAllowed = 'move';
-      event.dataTransfer.setData('text/plain', id);
-    });
-    row.addEventListener('dragend', () => {
-      row.draggable = false;
-      row.classList.remove('is-dragging');
-      draggingEvergreenId = null;
-      els.evergreenList.querySelectorAll('.evergreen-item.is-drop-target').forEach(item => item.classList.remove('is-drop-target'));
-    });
-    row.addEventListener('dragover', event => {
-      if (!isEvergreenEditMode) return;
-      if (!draggingEvergreenId || draggingEvergreenId === id) return;
-      event.preventDefault();
-      row.classList.add('is-drop-target');
-    });
-    row.addEventListener('dragleave', () => row.classList.remove('is-drop-target'));
-    row.addEventListener('drop', async event => {
-      event.preventDefault();
-      row.classList.remove('is-drop-target');
-      const sourceId = event.dataTransfer.getData('text/plain') || draggingEvergreenId;
-      if (!sourceId || sourceId === id) return;
-      const rect = row.getBoundingClientRect();
-      const placement = event.clientY > rect.top + rect.height / 2 ? 'after' : 'before';
-      reorderEvergreen(sourceId, id, placement);
-      normalizeEvergreenOrder();
-      renderEvergreen();
-      await saveEvergreen();
-    });
-  });
-}
-
-function beginEvergreenPointerDrag(event, id, row) {
-  if (event.button !== 0) return;
-  event.preventDefault();
-  const state = {
-    id,
-    row,
-    pointerId: event.pointerId,
-    startX: event.clientX,
-    startY: event.clientY,
-    moved: false,
-    targetRow: null,
-    placement: 'before',
-  };
-  evergreenPointerDrag = state;
-
-  const clearTarget = () => {
-    els.evergreenList.querySelectorAll('.evergreen-item.is-drop-target').forEach(item => item.classList.remove('is-drop-target'));
-  };
-
-  const updateTarget = pointerEvent => {
-    clearTarget();
-    const target = document.elementFromPoint(pointerEvent.clientX, pointerEvent.clientY)?.closest('.evergreen-item');
-    if (!target || !els.evergreenList.contains(target) || target.dataset.id === id) {
-      state.targetRow = null;
-      return;
-    }
-    const rect = target.getBoundingClientRect();
-    state.targetRow = target;
-    state.placement = pointerEvent.clientY > rect.top + rect.height / 2 ? 'after' : 'before';
-    target.classList.add('is-drop-target');
-  };
-
-  const cleanup = () => {
-    window.removeEventListener('pointermove', onMove);
-    window.removeEventListener('pointerup', onUp);
-    window.removeEventListener('pointercancel', onCancel);
-    clearTarget();
-    row.classList.remove('is-dragging');
-    evergreenPointerDrag = null;
-  };
-
-  const onMove = pointerEvent => {
-    if (pointerEvent.pointerId !== state.pointerId) return;
-    const dx = Math.abs(pointerEvent.clientX - state.startX);
-    const dy = Math.abs(pointerEvent.clientY - state.startY);
-    if (dx > 4 || dy > 4) {
-      state.moved = true;
-      row.classList.add('is-dragging');
-    }
-    if (state.moved) {
-      pointerEvent.preventDefault();
-      updateTarget(pointerEvent);
-    }
-  };
-
-  const onUp = async pointerEvent => {
-    if (pointerEvent.pointerId !== state.pointerId) return;
-    const targetId = state.targetRow?.dataset.id;
-    const placement = state.placement;
-    cleanup();
-    if (!state.moved || !targetId || targetId === id) return;
-    reorderEvergreen(id, targetId, placement);
-    normalizeEvergreenOrder();
-    renderEvergreen();
-    await saveEvergreen();
-  };
-
-  const onCancel = pointerEvent => {
-    if (pointerEvent.pointerId !== state.pointerId) return;
-    cleanup();
-  };
-
-  window.addEventListener('pointermove', onMove);
-  window.addEventListener('pointerup', onUp);
-  window.addEventListener('pointercancel', onCancel);
-}
-
-function renderTodos() {
-  const filtered = dayItems.filter(item => {
-    if (activeFilter === 'completed') return Boolean(item.completed);
-    if (activeFilter === 'pending') return !item.completed;
-    return true;
-  });
-
-  els.todos.innerHTML = filtered.map(item => {
-    const checked = item.completed ? 'checked' : '';
-    const checkDisabled = isEditMode ? 'disabled' : '';
-    return `
-      <li class="todo ${item.completed ? 'is-completed' : ''}" data-id="${escapeHtml(item.id)}">
-        <input class="todo-check" type="checkbox" title="Complete" ${checked} ${checkDisabled}>
-        <button class="drag-btn row-action" type="button" title="Move">
-          <i class="fa-solid fa-grip-vertical"></i>
-        </button>
-        <span class="todo-time">${escapeHtml(item.start_time || '--:--')} ~ ${escapeHtml(item.end_time || '--:--')}</span>
-        <span class="todo-name">${escapeHtml(item.text || '')}</span>
-        <span class="todo-actions">
-          <button class="edit-btn row-action" type="button" title="Edit">
-            <i class="fa-regular fa-pen-to-square"></i>
-          </button>
-          <button class="delete-btn row-action" type="button" title="Delete">
-            <i class="fa fa-times"></i>
-          </button>
-        </span>
-      </li>
-    `;
-  }).join('');
-
-  els.emptyState.classList.toggle('is-visible', filtered.length === 0);
-
-  els.todos.querySelectorAll('.todo').forEach(row => {
-    const id = row.dataset.id;
-    row.addEventListener('click', async event => {
-      if (isEditMode) return;
-      if (event.target.closest('button, input')) return;
-      await toggleTodo(id);
-    });
-    row.querySelector('.todo-check').addEventListener('change', async event => {
-      if (isEditMode) {
-        const item = dayItems.find(entry => entry.id === id);
-        event.target.checked = Boolean(item?.completed);
-        return;
-      }
-      const item = dayItems.find(entry => entry.id === id);
-      if (!item) return;
-      item.completed = event.target.checked;
-      row.classList.toggle('is-completed', item.completed);
-      await saveCurrentDay();
-    });
-    row.querySelector('.edit-btn').addEventListener('click', event => {
-      event.stopPropagation();
-      openTaskEditor(id);
-    });
-    row.querySelector('.delete-btn').addEventListener('click', async () => {
-      const ok = await openDailyConfirmDialog({
-        title: 'Delete task?',
-        message: 'This will remove only this task.',
-        okText: 'Delete',
-        danger: true,
-      });
-      if (!ok) return;
-      dayItems = dayItems.filter(item => item.id !== id);
-      renderTodos();
-      await saveCurrentDay();
-    });
-    const dragBtn = row.querySelector('.drag-btn');
-    dragBtn.addEventListener('pointerdown', event => {
-      event.stopPropagation();
-      if (!isEditMode) return;
-      beginTodoPointerDrag(event, id, row);
-    });
-    dragBtn.addEventListener('click', event => event.stopPropagation());
-    row.addEventListener('dragstart', event => {
-      if (!isEditMode) {
-        event.preventDefault();
-        return;
-      }
-      draggingItemId = id;
-      row.classList.add('is-dragging');
-      event.dataTransfer.effectAllowed = 'move';
-      event.dataTransfer.setData('text/plain', id);
-    });
-    row.addEventListener('dragend', () => {
-      row.draggable = false;
-      row.classList.remove('is-dragging');
-      draggingItemId = null;
-      els.todos.querySelectorAll('.todo.is-drop-target').forEach(item => item.classList.remove('is-drop-target'));
-    });
-    row.addEventListener('dragover', event => {
-      if (!draggingItemId || draggingItemId === id) return;
-      event.preventDefault();
-      row.classList.add('is-drop-target');
-    });
-    row.addEventListener('dragleave', () => row.classList.remove('is-drop-target'));
-    row.addEventListener('drop', async event => {
-      event.preventDefault();
-      row.classList.remove('is-drop-target');
-      const sourceId = event.dataTransfer.getData('text/plain') || draggingItemId;
-      if (!sourceId || sourceId === id) return;
-      const rect = row.getBoundingClientRect();
-      const placement = event.clientY > rect.top + rect.height / 2 ? 'after' : 'before';
-      reorderTodo(sourceId, id, placement);
-      applySequentialOneHourTimes();
-      renderTodos();
-      await saveCurrentDay();
-    });
-  });
-}
-
-function beginTodoPointerDrag(event, id, row) {
-  if (event.button !== 0) return;
-  event.preventDefault();
-  const state = {
-    id,
-    row,
-    pointerId: event.pointerId,
-    startX: event.clientX,
-    startY: event.clientY,
-    moved: false,
-    targetRow: null,
-    placement: 'before',
-  };
-  todoPointerDrag = state;
-
-  const clearTarget = () => {
-    els.todos.querySelectorAll('.todo.is-drop-target').forEach(item => item.classList.remove('is-drop-target'));
-  };
-
-  const updateTarget = pointerEvent => {
-    clearTarget();
-    const target = document.elementFromPoint(pointerEvent.clientX, pointerEvent.clientY)?.closest('.todo');
-    if (!target || !els.todos.contains(target) || target.dataset.id === id) {
-      state.targetRow = null;
-      return;
-    }
-    const rect = target.getBoundingClientRect();
-    state.targetRow = target;
-    state.placement = pointerEvent.clientY > rect.top + rect.height / 2 ? 'after' : 'before';
-    target.classList.add('is-drop-target');
-  };
-
-  const cleanup = () => {
-    window.removeEventListener('pointermove', onMove);
-    window.removeEventListener('pointerup', onUp);
-    window.removeEventListener('pointercancel', onCancel);
-    clearTarget();
-    row.classList.remove('is-dragging');
-    todoPointerDrag = null;
-  };
-
-  const onMove = pointerEvent => {
-    if (pointerEvent.pointerId !== state.pointerId) return;
-    const dx = Math.abs(pointerEvent.clientX - state.startX);
-    const dy = Math.abs(pointerEvent.clientY - state.startY);
-    if (dx > 4 || dy > 4) {
-      state.moved = true;
-      row.classList.add('is-dragging');
-    }
-    if (state.moved) {
-      pointerEvent.preventDefault();
-      updateTarget(pointerEvent);
-    }
-  };
-
-  const onUp = async pointerEvent => {
-    if (pointerEvent.pointerId !== state.pointerId) return;
-    const targetId = state.targetRow?.dataset.id;
-    const placement = state.placement;
-    cleanup();
-    if (!state.moved || !targetId || targetId === id) return;
-    reorderTodo(id, targetId, placement);
-    applySequentialOneHourTimes();
-    renderTodos();
-    await saveCurrentDay();
-  };
-
-  const onCancel = pointerEvent => {
-    if (pointerEvent.pointerId !== state.pointerId) return;
-    cleanup();
-  };
-
-  window.addEventListener('pointermove', onMove);
-  window.addEventListener('pointerup', onUp);
-  window.addEventListener('pointercancel', onCancel);
-}
-
-async function toggleTodo(id) {
-  const item = dayItems.find(entry => entry.id === id);
-  if (!item) return;
-  item.completed = !item.completed;
-  renderTodos();
-  await saveCurrentDay();
-}
-
-function setEditMode(nextValue) {
-  isEditMode = Boolean(nextValue);
-  document.body.classList.toggle('daily-edit-mode', isEditMode);
-  els.editModeToggle.classList.toggle('is-active', isEditMode);
-  els.editModeToggle.setAttribute('aria-pressed', String(isEditMode));
-  if (!isEditMode) {
-    draggingItemId = null;
-    todoPointerDrag = null;
-    els.todos.querySelectorAll('.todo').forEach(row => {
-      row.draggable = false;
-      row.classList.remove('is-dragging', 'is-drop-target');
-    });
+function openDailyConfirmDialog({ title, message, okText = 'OK', cancelText = 'Cancel', danger = false, autoConfirm = null }) {
+  if (window.actionDialogs?.confirm) {
+    return window.actionDialogs.confirm({ title, message, okText, cancelText, danger, autoConfirm });
   }
-  renderTodos();
-}
-
-function openTaskEditor(id) {
-  const item = dayItems.find(entry => entry.id === id);
-  if (!item) return;
-  editingItemId = id;
-  els.editTaskDate.value = formatDate(currentDate);
-  els.editStartTime.value = item.start_time || '08:00';
-  els.editEndTime.value = item.end_time || '09:00';
-  els.editTaskInput.value = item.text || '';
-  if (typeof els.taskEditDialog.showModal === 'function') els.taskEditDialog.showModal();
-  else els.taskEditDialog.setAttribute('open', '');
-  setTimeout(() => els.editTaskInput.select(), 0);
-}
-
-function closeTaskEditor() {
-  editingItemId = null;
-  if (els.taskEditDialog.open && typeof els.taskEditDialog.close === 'function') els.taskEditDialog.close();
-  else els.taskEditDialog.removeAttribute('open');
-}
-
-function openEvergreenEditor(id = null) {
-  const item = evergreenItems.find(entry => entry.id === id);
-  editingEvergreenId = item ? item.id : null;
-  els.evergreenDialogTitle.textContent = item ? 'Edit long-term item' : 'New long-term item';
-  els.evergreenInput.value = item?.text || '';
-  els.evergreenPriority.value = normalizePriority(item?.priority);
-  els.evergreenStatus.value = normalizeEvergreenStatus(item?.status, item?.completed);
-  if (typeof els.evergreenDialog.showModal === 'function') els.evergreenDialog.showModal();
-  else els.evergreenDialog.setAttribute('open', '');
-  setTimeout(() => els.evergreenInput.select(), 0);
-}
-
-function closeEvergreenEditor() {
-  editingEvergreenId = null;
-  if (els.evergreenDialog.open && typeof els.evergreenDialog.close === 'function') els.evergreenDialog.close();
-  else els.evergreenDialog.removeAttribute('open');
-}
-
-function setEvergreenEditMode(nextValue) {
-  isEvergreenEditMode = Boolean(nextValue);
-  document.body.classList.toggle('long-term-edit-mode', isEvergreenEditMode);
-  els.evergreenEditModeToggle.classList.toggle('is-active', isEvergreenEditMode);
-  els.evergreenEditModeToggle.setAttribute('aria-pressed', String(isEvergreenEditMode));
-  renderEvergreen();
-}
-
-async function addEvergreenFromForm(event) {
-  event.preventDefault();
-  const text = els.evergreenQuickInput.value.trim();
-  if (!text) return;
-  evergreenItems.unshift({
-    id: `e${uid()}`,
-    text,
-    priority: 'high',
-    status: 'active',
-    completed: false,
-    createdAt: new Date().toISOString(),
-  });
-  els.evergreenQuickInput.value = '';
-  normalizeEvergreenOrder();
-  renderEvergreen();
-  await saveEvergreen();
-}
-
-async function saveEvergreenEditor() {
-  const text = els.evergreenInput.value.trim();
-  if (!text) {
-    els.evergreenInput.focus();
-    return;
-  }
-
-  const priority = normalizePriority(els.evergreenPriority.value);
-  const status = normalizeEvergreenStatus(els.evergreenStatus.value);
-  const existing = evergreenItems.find(item => item.id === editingEvergreenId);
-
-  if (existing) {
-    existing.text = text;
-    existing.priority = priority;
-    existing.status = status;
-    existing.completed = status === 'done';
-    existing.updatedAt = new Date().toISOString();
-  } else {
-    evergreenItems.unshift({
-      id: `e${uid()}`,
-      text,
-      priority,
-      status,
-      completed: status === 'done',
-      createdAt: new Date().toISOString(),
-    });
-  }
-
-  closeEvergreenEditor();
-  normalizeEvergreenOrder();
-  renderEvergreen();
-  await saveEvergreen();
-}
-
-async function scheduleEvergreenToday(id) {
-  const item = evergreenItems.find(entry => entry.id === id);
-  if (!item) return;
-  const start = els.startTime.value;
-  const end = els.endTime.value;
-  if (hhmmToTotal(start) >= hhmmToTotal(end)) {
-    setStatus('Invalid time', 'error');
-    return;
-  }
-  dayItems.push({
-    id: uid(),
-    start_time: start,
-    end_time: end,
-    text: item.text,
-    completed: false,
-    sourceEvergreenId: item.id,
-  });
-  sortItems();
-  renderTodos();
-  await saveCurrentDay();
-}
-
-async function saveTaskEditor() {
-  const editingId = editingItemId;
-  const item = dayItems.find(entry => entry.id === editingId);
-  if (!item) return;
-  const text = els.editTaskInput.value.trim();
-  const sourceDateKey = formatDate(currentDate);
-  const targetDateKey = els.editTaskDate.value;
-  const targetDate = parseDateKey(targetDateKey);
-  const start = els.editStartTime.value;
-  const end = els.editEndTime.value;
-  if (!text) {
-    els.editTaskInput.focus();
-    return;
-  }
-  if (!targetDate) {
-    els.editTaskDate.focus();
-    return;
-  }
-  if (hhmmToTotal(start) >= hhmmToTotal(end)) {
-    setStatus('時間錯誤', 'error');
-    return;
-  }
-  const nextItem = {
-    ...item,
-    text,
-    start_time: start,
-    end_time: end,
-  };
-  closeTaskEditor();
-  if (targetDateKey === sourceDateKey) {
-    Object.assign(item, nextItem);
-    sortItems();
-    renderTodos();
-    await saveCurrentDay();
-    return;
-  }
-
-  dayItems = dayItems.filter(entry => entry.id !== editingId);
-  sortItems();
-  renderTodos();
-  await saveItemsForDate(sourceDateKey, dayItems);
-
-  const targetItems = await loadItemsForDate(targetDateKey);
-  const nextTargetItems = sortItemList([
-    ...targetItems.filter(entry => entry.id !== nextItem.id),
-    nextItem,
-  ]);
-  await saveItemsForDate(targetDateKey, nextTargetItems);
-  currentDate = targetDate;
-  dayItems = nextTargetItems;
-  updateDateHeader();
-  renderTodos();
-}
-
-function openDailyConfirmDialog({ title, message, okText = 'OK', cancelText = 'Cancel', danger = false }) {
   return new Promise(resolve => {
     document.querySelectorAll('.daily-confirm-overlay').forEach(node => node.remove());
 
@@ -820,20 +242,17 @@ function openDeleteAllUserCheckDialogV2() {
     overlay.innerHTML = `
       <div class="daily-confirm-dialog daily-account-confirm" role="dialog" aria-modal="true">
         <button type="button" class="daily-confirm-close" aria-label="Close">
-          <i class="fa fa-times"></i>
+          <i class="fa-regular fa-circle-xmark"></i>
         </button>
         <div class="daily-confirm-title">Verify account</div>
-        <div class="daily-confirm-message daily-account-progress">Enter current account to continue.</div>
+        <div class="daily-confirm-message daily-account-progress counter counter-yellow">Entered 0 / 8 digits</div>
         <label class="daily-account-field">
-          <input class="daily-account-input" type="text" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="00000000">
-          <i class="fa-regular fa-user daily-account-icon"></i>
+          <input class="daily-account-input" type="text" inputmode="numeric" maxlength="8" autocomplete="off" placeholder=" ">
+          <span class="daily-account-label">login-in name</span>
         </label>
         <div class="daily-confirm-message daily-account-error" aria-live="polite"></div>
         <div class="daily-confirm-actions">
-          <button type="button" class="daily-confirm-clear">
-            <i class="fa-solid fa-broom"></i>
-            <span>Clear</span>
-          </button>
+          <button type="button" class="daily-confirm-clear">Clear</button>
           <button type="button" class="daily-confirm-ok" disabled>Continue</button>
         </div>
       </div>
@@ -856,14 +275,21 @@ function openDeleteAllUserCheckDialogV2() {
       const isComplete = input.value.length === 8;
       const isMatched = input.value === expectedUserId;
       progress.textContent = `Entered ${input.value.length} / 8 digits`;
+      progress.className = 'daily-confirm-message daily-account-progress counter';
       error.textContent = '';
+      input.classList.toggle('is-account-complete', isComplete);
       input.classList.toggle('is-valid', isMatched);
       input.classList.toggle('is-invalid', isComplete && !isMatched);
       continueButton.disabled = !isMatched;
-      if (isMatched) {
-        progress.textContent = 'Account matched. Continue to final confirmation.';
-      } else if (isComplete) {
+      if (isComplete && !isMatched) {
+        progress.classList.add('counter-red', 'weight');
         error.textContent = 'Account does not match the current user.';
+      } else if (isComplete) {
+        progress.classList.add('counter-blue-strong', 'weight');
+      } else if (input.value.length > 0) {
+        progress.classList.add('counter-green');
+      } else {
+        progress.classList.add('counter-yellow');
       }
     };
 
@@ -911,7 +337,7 @@ function openDeleteAllUserCheckDialog() {
           <i class="fa fa-times"></i>
         </button>
         <div class="daily-confirm-title">Verify account</div>
-        <div class="daily-confirm-message daily-account-progress">已輸入 0 / 8 number</div>
+        <div class="daily-confirm-message daily-account-progress">已輸入 0 / 8 碼</div>
         <label class="daily-account-field">
           <input class="daily-account-input" type="text" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="00000000">
           <i class="fa-regular fa-user daily-account-icon"></i>
@@ -941,7 +367,7 @@ function openDeleteAllUserCheckDialog() {
 
     const update = () => {
       input.value = input.value.replace(/\D/g, '').slice(0, 8);
-      progress.textContent = `已輸入 ${input.value.length} / 8 number`;
+      progress.textContent = `已輸入 ${input.value.length} / 8 碼`;
       error.textContent = '';
       const isComplete = input.value.length === 8;
       const isMatched = input.value === expectedUserId;
@@ -991,25 +417,6 @@ function openDeleteAllUserCheckDialog() {
   });
 }
 
-function reorderTodo(sourceId, targetId, placement = 'before') {
-  const from = dayItems.findIndex(item => item.id === sourceId);
-  const target = dayItems.findIndex(item => item.id === targetId);
-  if (from < 0 || target < 0 || from === target) return;
-  const [moved] = dayItems.splice(from, 1);
-  const nextTargetIndex = dayItems.findIndex(item => item.id === targetId);
-  const insertAt = nextTargetIndex + (placement === 'after' ? 1 : 0);
-  dayItems.splice(insertAt, 0, moved);
-}
-
-function applySequentialOneHourTimes() {
-  if (!dayItems.length) return;
-  let cursor = hhmmToTotal(dayItems[0].start_time || '08:00');
-  dayItems.forEach(item => {
-    item.start_time = totalToHhmm(cursor);
-    item.end_time = totalToHhmm(cursor + 60);
-    cursor += 60;
-  });
-}
 
 async function loadEvergreen() {
   try {
@@ -1155,46 +562,32 @@ function sortItems() {
 }
 
 function sortItemList(items) {
-  return items.sort((a, b) => {
-    const time = String(a.start_time || '').localeCompare(String(b.start_time || ''));
-    if (time !== 0) return time;
-    return String(a.text || '').localeCompare(String(b.text || ''));
-  });
+  return items.sort(compareItemsByTime);
 }
 
-function sortEvergreen() {
-  const priorityWeight = { high: 0, medium: 1, low: 2 };
-  const statusWeight = { active: 0, paused: 1, done: 2, archived: 3 };
-  evergreenItems.sort((a, b) => {
-    const aOrder = Number(a.order);
-    const bOrder = Number(b.order);
-    const aHasOrder = Number.isFinite(aOrder);
-    const bHasOrder = Number.isFinite(bOrder);
-    if (aHasOrder && bHasOrder && aOrder !== bOrder) return aOrder - bOrder;
-    if (aHasOrder && !bHasOrder) return -1;
-    if (!aHasOrder && bHasOrder) return 1;
-    const byStatus = (statusWeight[normalizeEvergreenStatus(a.status, a.completed)] ?? 9) - (statusWeight[normalizeEvergreenStatus(b.status, b.completed)] ?? 9);
-    if (byStatus !== 0) return byStatus;
-    const byPriority = (priorityWeight[normalizePriority(a.priority)] ?? 9) - (priorityWeight[normalizePriority(b.priority)] ?? 9);
-    if (byPriority !== 0) return byPriority;
-    return String(a.createdAt || '').localeCompare(String(b.createdAt || ''));
-  });
+function isAvailabilityItem(item) {
+  if (!item || typeof item !== 'object') return false;
+  const itemType = String(item.type || item.itemType || '').toLowerCase();
+  return itemType === 'availability';
 }
 
-function normalizeEvergreenOrder() {
-  evergreenItems.forEach((item, index) => {
-    item.order = index;
-  });
+function compareItemsByTime(a, b) {
+  const time = String(a.start_time || '').localeCompare(String(b.start_time || ''));
+  if (time !== 0) return time;
+  return String(a.text || '').localeCompare(String(b.text || ''));
 }
 
-function reorderEvergreen(sourceId, targetId, placement = 'before') {
-  const from = evergreenItems.findIndex(item => item.id === sourceId);
-  const target = evergreenItems.findIndex(item => item.id === targetId);
-  if (from < 0 || target < 0 || from === target) return;
-  const [moved] = evergreenItems.splice(from, 1);
-  const nextTargetIndex = evergreenItems.findIndex(item => item.id === targetId);
-  const insertAt = nextTargetIndex + (placement === 'after' ? 1 : 0);
-  evergreenItems.splice(insertAt, 0, moved);
+function renderAvailabilityPeople(item) {
+  const people = Array.isArray(item?.availabilityPeople)
+    ? item.availabilityPeople.filter(person => person && typeof person === 'object' && String(person.name || '').trim())
+    : [];
+  if (!people.length) return '<span class="availability-empty">Set people</span>';
+
+  return people.map(person => {
+    const status = String(person.status || '').toLowerCase() === 'not-free' ? 'not-free' : 'free';
+    const label = status === 'not-free' ? 'not free' : 'free';
+    return `<span class="availability-person is-${status}">${escapeHtml(person.name)} ${label}</span>`;
+  }).join(' ');
 }
 
 function updateDateHeader() {
@@ -1226,32 +619,18 @@ function getOneHourEndTime(startValue) {
   return totalToHhmm(endTotal);
 }
 
-function openUserDialog() {
-  els.userInput.value = userId;
-  els.overlay.classList.add('is-open');
-  if (typeof els.userDialog.showModal === 'function') els.userDialog.showModal();
-  else els.userDialog.setAttribute('open', '');
-  setTimeout(() => els.userInput.select(), 0);
-}
-
-function closeUserDialog() {
-  els.overlay.classList.remove('is-open');
-  if (els.userDialog.open && typeof els.userDialog.close === 'function') els.userDialog.close();
-  else els.userDialog.removeAttribute('open');
-}
-
-function applyUserIdFromDialog() {
-  const next = els.userInput.value.trim();
+function applyUserIdFromDialog(next = els.userInput.value.trim()) {
   if (!isValidCalendarUserId(next)) {
     els.userInput.focus();
     setStatus('帳號需 8 碼', 'error');
     return;
   }
   userId = next;
+  window.dailyUserId = userId;
   setStoredCalendarUserId(userId);
   updateUserDisplay();
   updateModeLinks();
-  closeUserDialog();
+  if (typeof window.closeAccountUserDialog === 'function') window.closeAccountUserDialog();
   connectWs();
   loadCurrentDay();
 }
@@ -1268,8 +647,7 @@ function updateModeLinks() {
 
 function connectWs() {
   if (ws) ws.close();
-  const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  ws = new WebSocket(`${protocol}://${location.host}/?userId=${encodeURIComponent(userId)}`);
+  ws = window.createDailyCalendarWebSocket(userId);
   ws.addEventListener('message', event => {
     let msg;
     try {
@@ -1295,40 +673,6 @@ function connectWs() {
 function setStatus(text, cls = '') {
   els.status.textContent = text;
   els.status.className = `status ${cls}`.trim();
-}
-
-function initCalendarUserId(defaultUserId) {
-  const queryUserId = new URLSearchParams(location.search).get('userId');
-  if (isValidCalendarUserId(queryUserId)) {
-    setStoredCalendarUserId(queryUserId);
-    return queryUserId;
-  }
-  const stored = readStoredCalendarUserId();
-  if (isValidCalendarUserId(stored)) return stored;
-  setStoredCalendarUserId(defaultUserId);
-  return defaultUserId;
-}
-
-function readStoredCalendarUserId() {
-  try {
-    return localStorage.getItem(CALENDAR_USER_STORAGE_KEY);
-  } catch (error) {
-    return null;
-  }
-}
-
-function setStoredCalendarUserId(value) {
-  if (!isValidCalendarUserId(value)) return false;
-  try {
-    localStorage.setItem(CALENDAR_USER_STORAGE_KEY, value);
-    return true;
-  } catch (error) {
-    return false;
-  }
-}
-
-function isValidCalendarUserId(value) {
-  return /^[0-9]{8}$/.test(String(value || '').trim());
 }
 
 function startOfToday() {

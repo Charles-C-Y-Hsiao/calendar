@@ -1,0 +1,190 @@
+    /* Day-panel dialog. */
+    .day-panel-title {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 9px;
+    }
+
+    .time-panel-title {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 9px;
+    }
+
+    /* .day-panel-subtitle {
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 10px;
+    } */
+
+    .time-panel-subtitle {
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 10px;
+    }
+
+    .time-panel-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 8px;
+    }
+
+    .time-panel-row label {
+        font-size: 13px;
+        min-width: 32px;
+    }
+
+    .time-panel-row input[type="date"],
+    .time-panel-row input[type="time"] {
+        font-size: 13px;
+        padding: 2px 4px;
+        height: 28.4px;
+        font-family: calibri;
+    }
+
+    .day-panel-list {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 4px;
+        max-height: 50vh;
+        overflow-y: auto;
+        background: #fafafa;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        gap: 4px;
+    }
+
+    .day-panel-item {
+        display: flex;
+        align-items: center;
+        /* gap: 6px; */
+        /* padding: 3px 4px; */
+        border-radius: 3px;
+        background: #fff;
+        /* margin-bottom: 4px; */
+    }
+
+    .day-panel-item.dragging {
+        opacity: 0.6;
+    }
+
+    .day-panel-item input[type="text"] {
+        /* flex: 1 1 auto; */
+        flex: 1;
+        min-width: 0;
+        font-size: 13px;
+        padding: 2px 4px;
+        border: none;
+        margin-right: 5px;
+    }
+
+    .day-panel-item .time-box {
+        width: 75px;
+        font-size: 12px;
+        color: #555;
+        margin-right: 6px;
+        white-space: nowrap;
+    }
+
+    .day-panel-item .drag-handle {        
+        font-size: 14px;
+        user-select: none;
+        width: 22px;
+        height: 22px;
+        cursor: grab;
+        display: grid;
+        place-items: center;
+    }
+
+    .day-panel-item .task-edit {
+        border: none;
+        background: none;
+        width: 22px;
+        height: 22px;
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+    }
+
+    .day-panel-item .task-del {
+        border: none;
+        /* background: #f5f5f5; */
+        background: none;
+        /* border-radius: 50%; */
+        width: 22px;
+        height: 22px;
+        /* font-size: 12px; */
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+    }
+
+    .day-panel-item .drag-handle svg,
+    .day-panel-item .task-edit svg,
+    .day-panel-item .task-del svg {
+        width: 16px;
+        height: 16px;
+        fill: #666;
+    }
+
+    /* .day-panel-item .task-del svg {
+        fill: #d11;
+    } */
+
+    .day-panel-item .task-edit svg {
+        fill: #4070f4;
+    }
+
+
+    .day-panel-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 9px;
+    }
+
+    .day-panel-footer .day-panel-add {
+        /* padding: 3px 8px; */
+        font-size: 13px;
+        /* border-radius: 4px; */
+        /* border: 1px solid #ccc; */
+        cursor: pointer;
+        width: 27px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        border: none;
+        background: transparent;
+    }
+
+    .day-panel-footer .day-panel-add svg {
+        transform: rotate(45deg);
+    }
+
+    .dt-dialog-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        /* margin-top: 6px; */
+    }
+
+    .dt-dialog-actions button {
+        min-width: 64px;
+        padding: 4px 10px;
+        font-size: 13px;
+        border-radius: 18px;
+        border: none;
+        cursor: pointer;
+    }
+
+    .dt-dialog-actions .dt-ok {
+        background: #1a73e8;
+        color: #fff;
+    }
+
+    .dt-dialog-actions .dt-cancel {
+        background: #e4e4e4;
+        color: #333;
+    }
